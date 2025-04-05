@@ -1,0 +1,914 @@
+{-Agda-
+open import Data.Bool using (T; not)
+open import Data.Empty using (⊥; ⊥-elim)
+open import Data.List using (List; _∷_; [])
+open import Data.Nat using (ℕ; zero; suc)
+open import Data.Product using (∃-syntax; _×_)
+open import Data.String using (String; _≟_)
+open import Relation.Nullary using (Dec; yes; no; ¬_)
+open import Relation.Nullary.Decidable using (⌊_⌋; False; toWitnessFalse)
+open import Relation.Nullary.Negation using (¬?)
+open import Relation.Binary.PropositionalEquality using (_≡_; _≢_; refl)
+-Agda-}
+
+\import Arith.Nat
+\import Data.List
+\import Equiv
+\import Function.Meta ($)
+\import Logic
+\import Logic.Meta
+\import Meta
+\import Paths
+\import Paths.Meta
+\import Set
+
+{-Agda-
+Id : Set
+Id = String
+
+infix  5  ƛ_⇒_
+infix  5  μ_⇒_
+infixl 7  _·_
+infix  8  `suc_
+infix  9  `_
+
+data Term : Set where
+  `_                      :  Id → Term
+  ƛ_⇒_                    :  Id → Term → Term
+  _·_                     :  Term → Term → Term
+  `zero                   :  Term
+  `suc_                   :  Term → Term
+  case_[zero⇒_|suc_⇒_]    :  Term → Term → Id → Term → Term
+  μ_⇒_                    :  Id → Term → Term
+-Agda-}
+
+-- There is no String data type in Arend, so we will use natural numbers as identifiers.
+
+\func Id => Nat
+
+-- Here we import all identifiers that will be used in this chapter.
+
+\import util.LambdaIdentifiers
+
+\data Term
+  | ref Id
+  | lam Id Term
+  | app \alias \infixl 7 ∙ Term Term
+  | zero'
+  | suc' Term
+  | case (num : Term) (zeroCase : Term) (sucId : Id) (sucCase : Term)
+  | fixpoint Id Term
+
+{-Agda-
+two : Term
+two = `suc `suc `zero
+
+plus : Term
+plus = μ "+" ⇒ ƛ "m" ⇒ ƛ "n" ⇒
+         case ` "m"
+           [zero⇒ ` "n"
+           |suc "m" ⇒ `suc (` "+" · ` "m" · ` "n") ]
+-Agda-}
+
+\func two => suc' (suc' zero')
+
+\func plus => fixpoint PLUS (lam M (lam N
+    (case (ref M)
+        (ref N)
+        M (suc' (ref PLUS ∙ ref M ∙ ref N))
+    )
+))
+
+{-Agda-
+twoᶜ : Term
+twoᶜ =  ƛ "s" ⇒ ƛ "z" ⇒ ` "s" · (` "s" · ` "z")
+
+plusᶜ : Term
+plusᶜ =  ƛ "m" ⇒ ƛ "n" ⇒ ƛ "s" ⇒ ƛ "z" ⇒
+         ` "m" · ` "s" · (` "n" · ` "s" · ` "z")
+
+sucᶜ : Term
+sucᶜ = ƛ "n" ⇒ `suc (` "n")
+-Agda-}
+
+\func two-c => lam S (lam Z (ref S ∙ (ref S ∙ ref Z)))
+
+\func plus-c => lam M (lam N (lam S (lam Z (ref M ∙ ref S ∙ (ref N ∙ ref S ∙ ref Z)))))
+
+\func suc-c => lam N (suc' (ref N))
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func mul => fixpoint MUL (lam M (lam N
+    (case (ref M)
+        zero'
+        M (plus ∙ ref N ∙ (ref MUL ∙ ref M ∙ ref N))
+    )
+))
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func zero-c => lam S (lam Z (ref Z))
+
+\func mul-c1 => lam M (lam N (ref M ∙ (plus-c ∙ ref N) ∙ zero-c))
+
+\func mul-c2 => lam M (lam N (lam S (lam Z (ref M ∙ (ref N ∙ ref S) ∙ ref Z))))
+
+{-Agda-
+ƛ′_⇒_ : Term → Term → Term
+ƛ′ (` x) ⇒ N  =  ƛ x ⇒ N
+ƛ′ _ ⇒ _      =  ⊥-elim impossible
+  where postulate impossible : ⊥
+
+case′_[zero⇒_|suc_⇒_] : Term → Term → Term → Term → Term
+case′ L [zero⇒ M |suc (` x) ⇒ N ]  =  case L [zero⇒ M |suc x ⇒ N ]
+case′ _ [zero⇒ _ |suc _ ⇒ _ ]      =  ⊥-elim impossible
+  where postulate impossible : ⊥
+
+μ′_⇒_ : Term → Term → Term
+μ′ (` x) ⇒ N  =  μ x ⇒ N
+μ′ _ ⇒ _      =  ⊥-elim impossible
+  where postulate impossible : ⊥
+-Agda-}
+
+-- TODO
+
+{-Agda-
+plus′ : Term
+plus′ = μ′ + ⇒ ƛ′ m ⇒ ƛ′ n ⇒
+          case′ m
+            [zero⇒ n
+            |suc m ⇒ `suc (+ · m · n) ]
+  where
+  +  =  ` "+"
+  m  =  ` "m"
+  n  =  ` "n"
+-Agda-}
+
+-- TODO
+
+{-Agda-
+data Value : Term → Set where
+
+  V-ƛ : ∀ {x N}
+      ---------------
+    → Value (ƛ x ⇒ N)
+
+  V-zero :
+      -----------
+      Value `zero
+
+  V-suc : ∀ {V}
+    → Value V
+      --------------
+    → Value (`suc V)
+-Agda-}
+
+\data Value (t : Term) \with
+  | lam x N => V-lam
+  | zero' => V-zero'
+  | suc' V => V-suc' (Value V)
+
+{-Agda-
+infix 9 _[_:=_]
+
+_[_:=_] : Term → Id → Term → Term
+(` x) [ y := V ] with x ≟ y
+... | yes _          =  V
+... | no  _          =  ` x
+(ƛ x ⇒ N) [ y := V ] with x ≟ y
+... | yes _          =  ƛ x ⇒ N
+... | no  _          =  ƛ x ⇒ N [ y := V ]
+(L · M) [ y := V ]   =  L [ y := V ] · M [ y := V ]
+(`zero) [ y := V ]   =  `zero
+(`suc M) [ y := V ]  =  `suc M [ y := V ]
+(case L [zero⇒ M |suc x ⇒ N ]) [ y := V ] with x ≟ y
+... | yes _          =  case L [ y := V ] [zero⇒ M [ y := V ] |suc x ⇒ N ]
+... | no  _          =  case L [ y := V ] [zero⇒ M [ y := V ] |suc x ⇒ N [ y := V ] ]
+(μ x ⇒ N) [ y := V ] with x ≟ y
+... | yes _          =  μ x ⇒ N
+... | no  _          =  μ x ⇒ N [ y := V ]
+-Agda-}
+
+\func subst \alias \infix 9 <<= (N : Term) (s : \Sigma Id Term) : Term
+  | ref x, (y, V) => \case decideEq x y \with {
+    | yes _ => V
+    | no _ => ref x
+  }
+  | lam x N, (y, V) => \case decideEq x y \with {
+    | yes _ => lam x N
+    | no _ => lam x $ N <<= (y, V)
+  }
+  | ∙ L M, (y, V) => L <<= (y, V) ∙ M <<= (y, V)
+  | zero', (y, V) => zero'
+  | suc' M, (y, V) => suc' $ M <<= (y, V)
+  | case L M x N, (y, V) => \case decideEq x y \with {
+    | yes _ => case (L <<= (y, V)) (M <<= (y, V)) x N
+    | no _ => case (L <<= (y, V)) (M <<= (y, V)) x (N <<= (y, V))
+  }
+  | fixpoint x N, (y, V) => \case decideEq x y \with {
+    | yes _ => fixpoint x N
+    | no _ => fixpoint x $ N <<= (y, V)
+  }
+
+{-Agda-
+_ : (ƛ "z" ⇒ ` "s" · (` "s" · ` "z")) [ "s" := sucᶜ ] ≡ ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")
+_ = refl
+
+_ : (sucᶜ · (sucᶜ · ` "z")) [ "z" := `zero ] ≡ sucᶜ · (sucᶜ · `zero)
+_ = refl
+
+_ : (ƛ "x" ⇒ ` "y") [ "y" := `zero ] ≡ ƛ "x" ⇒ `zero
+_ = refl
+
+_ : (ƛ "x" ⇒ ` "x") [ "x" := `zero ] ≡ ƛ "x" ⇒ ` "x"
+_ = refl
+
+_ : (ƛ "y" ⇒ ` "y") [ "x" := `zero ] ≡ ƛ "y" ⇒ ` "y"
+_ = refl
+-Agda-}
+
+\func example-subst1 : lam Z (ref S ∙ (ref S ∙ ref Z)) <<= (S, suc-c) = lam Z (suc-c ∙ (suc-c ∙ ref Z)) => idp
+
+\func example-subst2 : suc-c ∙ (suc-c ∙ ref Z) <<= (Z, zero') = suc-c ∙ (suc-c ∙ zero') => idp
+
+\func example-subst3 : lam X (ref Y) <<= (Y, zero') = lam X zero' => idp
+
+\func example-subst4 : lam X (ref X) <<= (X, zero') = lam X (ref X) => idp
+
+\func example-subst5 : lam Y (ref Y) <<= (X, zero') = lam Y (ref Y) => idp
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\module SubstRefactoring \where {
+  \func subst \alias \infix 9 <<= (N : Term) (s : \Sigma Id Term) : Term
+    | ref x, (y, V) => \case decideEq x y \with {
+      | yes _ => V
+      | no _ => ref x
+    }
+    | lam x N, (y, V) => lam x $ N <<=-≠ (x, y, V)
+    | ∙ L M, (y, V) => L <<= (y, V) ∙ M <<= (y, V)
+    | zero', (y, V) => zero'
+    | suc' M, (y, V) => suc' $ M <<= (y, V)
+    | case L M x N, (y, V) => case (L <<= (y, V)) (M <<= (y, V)) x (N <<=-≠ (x, y, V))
+    | fixpoint x N, (y, V) => fixpoint x $ N <<=-≠ (x, y, V)
+
+  \func subst-if-not-equal \alias \infix 9 <<=-≠ (N : Term) (s : \Sigma Id Id Term) : Term \elim s
+    | (x, y, V) => \case decideEq x y \with {
+      | yes _ => N
+      | no _ => N <<= (y, V)
+    }
+}
+
+{-Agda-
+infix 4 _—→_
+
+data _—→_ : Term → Term → Set where
+
+  ξ-·₁ : ∀ {L L′ M}
+    → L —→ L′
+      -----------------
+    → L · M —→ L′ · M
+
+  ξ-·₂ : ∀ {V M M′}
+    → Value V
+    → M —→ M′
+      -----------------
+    → V · M —→ V · M′
+
+  β-ƛ : ∀ {x N V}
+    → Value V
+      ------------------------------
+    → (ƛ x ⇒ N) · V —→ N [ x := V ]
+
+  ξ-suc : ∀ {M M′}
+    → M —→ M′
+      ------------------
+    → `suc M —→ `suc M′
+
+  ξ-case : ∀ {x L L′ M N}
+    → L —→ L′
+      -----------------------------------------------------------------
+    → case L [zero⇒ M |suc x ⇒ N ] —→ case L′ [zero⇒ M |suc x ⇒ N ]
+
+  β-zero : ∀ {x M N}
+      ----------------------------------------
+    → case `zero [zero⇒ M |suc x ⇒ N ] —→ M
+
+  β-suc : ∀ {x V M N}
+    → Value V
+      ---------------------------------------------------
+    → case `suc V [zero⇒ M |suc x ⇒ N ] —→ N [ x := V ]
+
+  β-μ : ∀ {x M}
+      ------------------------------
+    → μ x ⇒ M —→ M [ x := μ x ⇒ M ]
+-Agda-}
+
+\data \infix 4 ~~> Term Term \with
+  | app L M, app L' M' => xi-app-1 (L ~~> L') (M = M')
+  | app V M, app V' M' => xi-app-2 (V = V') (Value V) (M ~~> M')
+  | app (lam x N) V, S => beta-lam (Value V) (S = N <<= (x, V))
+  | suc' M, suc' M' => xi-suc (M ~~> M')
+  | case L M x N, case L' M' x' N' => xi-case (L ~~> L') (M = M') (x = x') (N = N')
+  | case zero' M x N, M' => beta-zero (M = M')
+  | case (suc' V) M x N, S => beta-suc (Value V) (S = N <<= (x, V))
+  | fixpoint x M, S => beta-fixpoint (S = M <<= (x, fixpoint x M))
+
+{-Agda-
+infix  2 _—↠_
+infix  1 begin_
+infixr 2 _—→⟨_⟩_
+infix  3 _∎
+
+data _—↠_ : Term → Term → Set where
+  _∎ : ∀ M
+      ---------
+    → M —↠ M
+
+  _—→⟨_⟩_ : ∀ L {M N}
+    → L —→ M
+    → M —↠ N
+      ---------
+    → L —↠ N
+
+begin_ : ∀ {M N}
+  → M —↠ N
+    ------
+  → M —↠ N
+begin M—↠N = M—↠N
+-Agda-}
+
+\data \infix 2 ~~>> (L : Term) (N : Term)
+  | red-refl (L = N)
+  | red-trans {M : Term} (L ~~> M) (M ~~>> N)
+
+\func \fix 2 qed (a : Term) : a ~~>> a => red-refl idp
+
+\func \infix 2 ==< (a : Term) {a' : Term} (p : a ~~> a') : a ~~> a' => p
+
+\func \infixr 1 >== {a a' a'' : Term} (p : a ~~> a') (q : a' ~~>> a'') : a ~~>> a'' => red-trans p q
+
+{-Agda-
+data _—↠′_ : Term → Term → Set where
+
+  step′ : ∀ {M N}
+    → M —→ N
+      -------
+    → M —↠′ N
+
+  refl′ : ∀ {M}
+      -------
+    → M —↠′ M
+
+  trans′ : ∀ {L M N}
+    → L —↠′ M
+    → M —↠′ N
+      -------
+    → L —↠′ N
+-Agda-}
+
+\data \infix 2 ~~>>' (L : Term) (N : Term)
+  | red-step (L ~~> N)
+  | red-refl' (L = N)
+  | red-trans' {M : Term} (L ~~>>' M) (M ~~>>' N)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+-- TODO
+
+{-Agda-
+postulate
+  confluence : ∀ {L M N}
+    → ((L —↠ M) × (L —↠ N))
+      --------------------
+    → ∃[ P ] ((M —↠ P) × (N —↠ P))
+
+  diamond : ∀ {L M N}
+    → ((L —→ M) × (L —→ N))
+      --------------------
+    → ∃[ P ] ((M —↠ P) × (N —↠ P))
+-Agda-}
+
+\func confluence {L M N : Term} (_ : L ~~>> M) (_ : L ~~>> N) : ∃ {P} (M ~~>> P) (N ~~>> P) => {?}
+
+\func dimond {L M N : Term} (_ : L ~~> M) (_ : L ~~> N) : ∃ {P} (M ~~>> P) (N ~~>> P) => {?}
+
+{-Agda-
+postulate
+  deterministic : ∀ {L M N}
+    → L —→ M
+    → L —→ N
+      ------
+    → M ≡ N
+-Agda-}
+
+\func deterministics {L M N : Term} (_ : L ~~> M) (_ : L ~~> N) : M = N => {?}
+
+{-Agda-
+_ : twoᶜ · sucᶜ · `zero —↠ `suc `suc `zero
+_ =
+  begin
+    twoᶜ · sucᶜ · `zero
+  —→⟨ ξ-·₁ (β-ƛ V-ƛ) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · `zero
+  —→⟨ β-ƛ V-zero ⟩
+    sucᶜ · (sucᶜ · `zero)
+  —→⟨ ξ-·₂ V-ƛ (β-ƛ V-zero) ⟩
+    sucᶜ · `suc `zero
+  —→⟨ β-ƛ (V-suc V-zero) ⟩
+    `suc (`suc `zero)
+  ∎
+-Agda-}
+
+\func example-two-suc-zero : two-c ∙ suc-c ∙ zero' ~~>> suc' (suc' zero') =>
+  two-c ∙ suc-c ∙ zero' ==< xi-app-1 (beta-lam V-lam idp) idp >==
+  lam Z (suc-c ∙ (suc-c ∙ ref Z)) ∙ zero' ==< beta-lam V-zero' idp >==
+  suc-c ∙ (suc-c ∙ zero')  ==< xi-app-2 idp V-lam (beta-lam V-zero' idp) >==
+  suc-c ∙ suc' zero'  ==< beta-lam (V-suc' V-zero') idp >==
+  suc' (suc' zero') `qed
+
+{-Agda-
+_ : plus · two · two —↠ `suc `suc `suc `suc `zero
+_ =
+  begin
+    plus · two · two
+  —→⟨ ξ-·₁ (ξ-·₁ β-μ) ⟩
+    (ƛ "m" ⇒ ƛ "n" ⇒
+      case ` "m" [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+        · two · two
+  —→⟨ ξ-·₁ (β-ƛ (V-suc (V-suc V-zero))) ⟩
+    (ƛ "n" ⇒
+      case two [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+         · two
+  —→⟨ β-ƛ (V-suc (V-suc V-zero)) ⟩
+    case two [zero⇒ two |suc "m" ⇒ `suc (plus · ` "m" · two) ]
+  —→⟨ β-suc (V-suc V-zero) ⟩
+    `suc (plus · `suc `zero · two)
+  —→⟨ ξ-suc (ξ-·₁ (ξ-·₁ β-μ)) ⟩
+    `suc ((ƛ "m" ⇒ ƛ "n" ⇒
+      case ` "m" [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+        · `suc `zero · two)
+  —→⟨ ξ-suc (ξ-·₁ (β-ƛ (V-suc V-zero))) ⟩
+    `suc ((ƛ "n" ⇒
+      case `suc `zero [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+        · two)
+  —→⟨ ξ-suc (β-ƛ (V-suc (V-suc V-zero))) ⟩
+    `suc (case `suc `zero [zero⇒ two |suc "m" ⇒ `suc (plus · ` "m" · two) ])
+  —→⟨ ξ-suc (β-suc V-zero) ⟩
+    `suc `suc (plus · `zero · two)
+  —→⟨ ξ-suc (ξ-suc (ξ-·₁ (ξ-·₁ β-μ))) ⟩
+    `suc `suc ((ƛ "m" ⇒ ƛ "n" ⇒
+      case ` "m" [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+        · `zero · two)
+  —→⟨ ξ-suc (ξ-suc (ξ-·₁ (β-ƛ V-zero))) ⟩
+    `suc `suc ((ƛ "n" ⇒
+      case `zero [zero⇒ ` "n" |suc "m" ⇒ `suc (plus · ` "m" · ` "n") ])
+        · two)
+  —→⟨ ξ-suc (ξ-suc (β-ƛ (V-suc (V-suc V-zero)))) ⟩
+    `suc `suc (case `zero [zero⇒ two |suc "m" ⇒ `suc (plus · ` "m" · two) ])
+  —→⟨ ξ-suc (ξ-suc β-zero) ⟩
+    `suc (`suc (`suc (`suc `zero)))
+  ∎
+-Agda-}
+
+-- TODO
+
+{-Agda-
+_ : plusᶜ · twoᶜ · twoᶜ · sucᶜ · `zero —↠ `suc `suc `suc `suc `zero
+_ =
+  begin
+    (ƛ "m" ⇒ ƛ "n" ⇒ ƛ "s" ⇒ ƛ "z" ⇒ ` "m" · ` "s" · (` "n" · ` "s" · ` "z"))
+      · twoᶜ · twoᶜ · sucᶜ · `zero
+  —→⟨ ξ-·₁ (ξ-·₁ (ξ-·₁ (β-ƛ V-ƛ))) ⟩
+    (ƛ "n" ⇒ ƛ "s" ⇒ ƛ "z" ⇒ twoᶜ · ` "s" · (` "n" · ` "s" · ` "z"))
+      · twoᶜ · sucᶜ · `zero
+  —→⟨ ξ-·₁ (ξ-·₁ (β-ƛ V-ƛ)) ⟩
+    (ƛ "s" ⇒ ƛ "z" ⇒ twoᶜ · ` "s" · (twoᶜ · ` "s" · ` "z")) · sucᶜ · `zero
+  —→⟨ ξ-·₁ (β-ƛ V-ƛ) ⟩
+    (ƛ "z" ⇒ twoᶜ · sucᶜ · (twoᶜ · sucᶜ · ` "z")) · `zero
+  —→⟨ β-ƛ V-zero ⟩
+    twoᶜ · sucᶜ · (twoᶜ · sucᶜ · `zero)
+  —→⟨ ξ-·₁ (β-ƛ V-ƛ) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · (twoᶜ · sucᶜ · `zero)
+  —→⟨ ξ-·₂ V-ƛ (ξ-·₁ (β-ƛ V-ƛ)) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · ((ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · `zero)
+  —→⟨ ξ-·₂ V-ƛ (β-ƛ V-zero) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · (sucᶜ · (sucᶜ · `zero))
+  —→⟨ ξ-·₂ V-ƛ (ξ-·₂ V-ƛ (β-ƛ V-zero)) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · (sucᶜ · (`suc `zero))
+  —→⟨ ξ-·₂ V-ƛ (β-ƛ (V-suc V-zero)) ⟩
+    (ƛ "z" ⇒ sucᶜ · (sucᶜ · ` "z")) · (`suc `suc `zero)
+  —→⟨ β-ƛ (V-suc (V-suc V-zero)) ⟩
+    sucᶜ · (sucᶜ · `suc `suc `zero)
+  —→⟨ ξ-·₂ V-ƛ (β-ƛ (V-suc (V-suc V-zero))) ⟩
+    sucᶜ · (`suc `suc `suc `zero)
+  —→⟨ β-ƛ (V-suc (V-suc (V-suc V-zero))) ⟩
+   `suc (`suc (`suc (`suc `zero)))
+  ∎
+-Agda-}
+
+-- TODO
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func one => suc' zero'
+
+-- TODO is there a tactic that fills in all these constructor chains?
+--   Currently, everything between ==< and >== can be filled by calling "Replace with constructor" repeatedly.
+--   And this is tedious.
+
+\func example-one-plus-one : plus ∙ one ∙ one ~~>> suc' (suc' zero') =>
+  plus ∙ one ∙ one ==< xi-app-1 (xi-app-1 (beta-fixpoint idp) idp) idp >==
+  lam M (lam N
+      (case (ref M)
+          (ref N)
+          M (suc' (plus ∙ ref M ∙ ref N))
+      )
+  ) ∙ one ∙ one ==< xi-app-1 (beta-lam (V-suc' V-zero') idp) idp >==
+  lam N (case one
+      (ref N)
+      M (suc' (plus ∙ ref M ∙ ref N))
+  ) ∙ one ==< beta-lam (V-suc' V-zero') idp >==
+  case one
+      one
+      M (suc' (plus ∙ ref M ∙ one)) ==< beta-suc V-zero' idp >==
+  suc' (plus ∙ zero' ∙ one) ==< xi-suc (xi-app-1 (xi-app-1 (beta-fixpoint idp) idp) idp) >==
+  suc' (lam M (lam N
+      (case (ref M)
+          (ref N)
+          M (suc' (plus ∙ ref M ∙ ref N))
+      )
+  ) ∙ zero' ∙ one) ==< xi-suc (xi-app-1 (beta-lam V-zero' idp) idp) >==
+  suc' (lam N (case zero'
+      (ref N)
+      M (suc' (plus ∙ ref M ∙ ref N))
+  ) ∙ one) ==< xi-suc (beta-lam (V-suc' V-zero') idp) >==
+  suc' (case zero'
+      one
+      M (suc' (plus ∙ ref M ∙ one))) ==< xi-suc (beta-zero idp) >==
+  suc' (suc' zero') `qed
+
+\func one-c => lam S (lam Z (ref S ∙ ref Z))
+
+\func example-one-plus-one-c : plus-c ∙ one-c ∙ one-c ∙ suc-c ∙ zero' ~~>> suc' (suc' zero') =>
+  plus-c ∙ one-c ∙ one-c ∙ suc-c ∙ zero'
+    ==< xi-app-1 (xi-app-1 (xi-app-1 (beta-lam V-lam idp) idp) idp) idp >==
+  lam N (lam S (lam Z (one-c ∙ ref S ∙ (ref N ∙ ref S ∙ ref Z)))) ∙ one-c ∙ suc-c ∙ zero'
+    ==< xi-app-1 (xi-app-1 (beta-lam V-lam idp) idp) idp >==
+  lam S (lam Z (one-c ∙ ref S ∙ (one-c ∙ ref S ∙ ref Z))) ∙ suc-c ∙ zero'
+    ==< xi-app-1 (beta-lam V-lam idp) idp >==
+  lam Z (one-c ∙ suc-c ∙ (one-c ∙ suc-c ∙ ref Z)) ∙ zero'
+    ==< beta-lam V-zero' idp >==
+  one-c ∙ suc-c ∙ (one-c ∙ suc-c ∙ zero')
+    ==< xi-app-1 (beta-lam V-lam idp) idp >==
+  lam Z (suc-c ∙ ref Z) ∙ (one-c ∙ suc-c ∙ zero')
+    ==< xi-app-2 idp V-lam (xi-app-1 (beta-lam V-lam idp) idp) >==
+  lam Z (suc-c ∙ ref Z) ∙ (lam Z (suc-c ∙ ref Z) ∙ zero')
+    ==< xi-app-2 idp V-lam (beta-lam V-zero' idp) >==
+  lam Z (suc-c ∙ ref Z) ∙ (suc-c ∙ zero')
+    ==< xi-app-2 idp V-lam (beta-lam V-zero' idp) >==
+  lam Z (suc-c ∙ ref Z) ∙ suc' zero'
+    ==< beta-lam (V-suc' V-zero') idp >==
+  suc-c ∙ suc' zero'
+    ==< beta-lam (V-suc' V-zero') idp >==
+  suc' (suc' zero') `qed
+
+{-Agda-
+infixr 7 _⇒_
+
+data Type : Set where
+  _⇒_ : Type → Type → Type
+  `ℕ : Type
+-Agda-}
+
+\data Type
+  | arr \alias \infixr 7 ==> Type Type
+  | Nat'
+
+{-Agda-
+infixl 5  _,_⦂_
+
+data Context : Set where
+  ∅     : Context
+  _,_⦂_ : Context → Id → Type → Context
+-Agda-}
+
+\data Context
+  | nil-ctx \alias ∅
+  | cons-ctx \alias \infixl 5 |: Context (\Sigma Id Type)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func Context-equiv-List : QEquiv {Context} {List (\Sigma Id Type)} \cowith
+  | f (ctx : Context) : List (\Sigma Id Type) \with {
+    | ∅ => nil
+    | |: ctx b => b :: f ctx
+  }
+  | ret (xs : List (\Sigma Id Type)) : Context \with {
+    | nil => ∅
+    | :: x xs => ret xs |: x
+  }
+  | ret_f (ctx : Context) : ret (f ctx) = ctx \with {
+    | ∅ => idp
+    | |: ctx b => rewrite (ret_f ctx) idp
+  }
+  | f_sec (xs : List (\Sigma Id Type)) : f (ret xs) = xs \with {
+    | nil => idp
+    | :: x xs => rewrite (f_sec xs) idp
+  }
+
+{-Agda-
+infix  4  _∋_⦂_
+
+data _∋_⦂_ : Context → Id → Type → Set where
+
+  Z : ∀ {Γ x A}
+      ------------------
+    → Γ , x ⦂ A ∋ x ⦂ A
+
+  S : ∀ {Γ x y A B}
+    → x ≢ y
+    → Γ ∋ x ⦂ A
+      ------------------
+    → Γ , y ⦂ B ∋ x ⦂ A
+-Agda-}
+
+\data InContext \alias \infix 4 ∋ Context (\Sigma Id Type) \with
+  | |: G (x, A), (x', A') => Here (x' = x) (A' = A)
+  | |: G (y, B), (x, A) => There (x /= y) (G ∋ (x, A))
+
+{-Agda-
+_ : ∅ , "x" ⦂ `ℕ ⇒ `ℕ , "y" ⦂ `ℕ , "z" ⦂ `ℕ ∋ "x" ⦂ `ℕ ⇒ `ℕ
+_ = S (λ()) (S (λ()) Z)
+-Agda-}
+
+\func example-InContext : ∅ |: (X, Nat' ==> Nat') |: (Y, Nat') |: (Z, Nat') ∋ (X, Nat' ==> Nat') =>
+  There (\case __) (There (\case __) (Here idp idp))
+
+{-Agda-
+S′ : ∀ {Γ x y A B}
+   → {x≢y : False (x ≟ y)}
+   → Γ ∋ x ⦂ A
+     ------------------
+   → Γ , y ⦂ B ∋ x ⦂ A
+
+S′ {x≢y = x≢y} x = S (toWitnessFalse x≢y) x
+-Agda-}
+
+\meta here => Here idp idp
+
+\meta there p => There (\case __) p
+
+{-Agda-
+infix  4  _⊢_⦂_
+
+data _⊢_⦂_ : Context → Term → Type → Set where
+
+  -- Axiom
+  ⊢` : ∀ {Γ x A}
+    → Γ ∋ x ⦂ A
+      -----------
+    → Γ ⊢ ` x ⦂ A
+
+  -- ⇒-I
+  ⊢ƛ : ∀ {Γ x N A B}
+    → Γ , x ⦂ A ⊢ N ⦂ B
+      -------------------
+    → Γ ⊢ ƛ x ⇒ N ⦂ A ⇒ B
+
+  -- ⇒-E
+  _·_ : ∀ {Γ L M A B}
+    → Γ ⊢ L ⦂ A ⇒ B
+    → Γ ⊢ M ⦂ A
+      -------------
+    → Γ ⊢ L · M ⦂ B
+
+  -- ℕ-I₁
+  ⊢zero : ∀ {Γ}
+      --------------
+    → Γ ⊢ `zero ⦂ `ℕ
+
+  -- ℕ-I₂
+  ⊢suc : ∀ {Γ M}
+    → Γ ⊢ M ⦂ `ℕ
+      ---------------
+    → Γ ⊢ `suc M ⦂ `ℕ
+
+  -- ℕ-E
+  ⊢case : ∀ {Γ L M x N A}
+    → Γ ⊢ L ⦂ `ℕ
+    → Γ ⊢ M ⦂ A
+    → Γ , x ⦂ `ℕ ⊢ N ⦂ A
+      -------------------------------------
+    → Γ ⊢ case L [zero⇒ M |suc x ⇒ N ] ⦂ A
+
+  ⊢μ : ∀ {Γ x M A}
+    → Γ , x ⦂ A ⊢ M ⦂ A
+      -----------------
+    → Γ ⊢ μ x ⇒ M ⦂ A
+-Agda-}
+
+\data HasType \alias \infix 4 ⊢ Context (\Sigma Term Type) \with
+  | G, (ref x, A) => in-ctx-axiom (G ∋ (x, A))
+  | G, (lam x N, arr A B) => arr-intro (G |: (x, A) ⊢ (N, B))
+  | G, (app L M, B) => arr-elim {A : Type} (G ⊢ (L, A ==> B)) (G ⊢ (M, A))
+  | G, (zero', Nat') => nat-intro1
+  | G, (suc' M, Nat') => nat-intro2 (G ⊢ (M, Nat'))
+  | G, (case L M x N, A) => nat-elim (G ⊢ (L, Nat')) (G ⊢ (M, A)) (G |: (x, Nat') ⊢ (N, A))
+  | G, (fixpoint x M, A) => fixpoint-axiom (G |: (x, A) ⊢ (M, A))
+
+{-Agda-
+Ch : Type → Type
+Ch A = (A ⇒ A) ⇒ A ⇒ A
+
+⊢twoᶜ : ∀ {Γ A} → Γ ⊢ twoᶜ ⦂ Ch A
+⊢twoᶜ = ⊢ƛ (⊢ƛ (⊢` ∋s · (⊢` ∋s · ⊢` ∋z)))
+  where
+  ∋s = S′ Z
+  ∋z = Z
+-Agda-}
+
+\func Ch (A : Type) : Type => (A ==> A) ==> A ==> A
+
+\func has-type-two-c {G : Context} {A : Type} : G ⊢ (two-c, Ch A) =>
+  run {
+    arr-intro,
+    arr-intro,
+    arr-elim (in-ctx-axiom (there here)) (arr-elim (in-ctx-axiom (there here)) (in-ctx-axiom here))
+  }
+
+{-Agda-
+⊢two : ∀ {Γ} → Γ ⊢ two ⦂ `ℕ
+⊢two = ⊢suc (⊢suc ⊢zero)
+
+⊢plus : ∀ {Γ} → Γ ⊢ plus ⦂ `ℕ ⇒ `ℕ ⇒ `ℕ
+⊢plus = ⊢μ (⊢ƛ (⊢ƛ (⊢case (⊢` ∋m) (⊢` ∋n)
+         (⊢suc (⊢` ∋+ · ⊢` ∋m′ · ⊢` ∋n′)))))
+  where
+  ∋+  = S′ (S′ (S′ Z))
+  ∋m  = S′ Z
+  ∋n  = Z
+  ∋m′ = Z
+  ∋n′ = S′ Z
+
+⊢2+2 : ∅ ⊢ plus · two · two ⦂ `ℕ
+⊢2+2 = ⊢plus · ⊢two · ⊢two
+-Agda-}
+
+\func has-type-two {G : Context} : G ⊢ (two, Nat') => nat-intro2 (nat-intro2 nat-intro1)
+
+\func has-type-plus {G : Context} : G ⊢ (plus, Nat' ==> Nat' ==> Nat') =>
+  run {
+    fixpoint-axiom,
+    arr-intro,
+    arr-intro,
+    nat-elim
+        (in-ctx-axiom (there here))
+        (in-ctx-axiom here)
+        (nat-intro2 (arr-elim
+            (arr-elim
+                (in-ctx-axiom (there $ there $ there here))
+                (in-ctx-axiom here))
+            (in-ctx-axiom (there here))
+        ))
+  }
+
+\func has-type-2+2 : ∅ ⊢ (plus ∙ two ∙ two, Nat') =>
+  arr-elim (arr-elim has-type-plus has-type-two) has-type-two
+
+{-Agda-
+⊢plusᶜ : ∀ {Γ A} → Γ  ⊢ plusᶜ ⦂ Ch A ⇒ Ch A ⇒ Ch A
+⊢plusᶜ = ⊢ƛ (⊢ƛ (⊢ƛ (⊢ƛ (⊢` ∋m · ⊢` ∋s · (⊢` ∋n · ⊢` ∋s · ⊢` ∋z)))))
+  where
+  ∋m = S′ (S′ (S′ Z))
+  ∋n = S′ (S′ Z)
+  ∋s = S′ Z
+  ∋z = Z
+
+⊢sucᶜ : ∀ {Γ} → Γ ⊢ sucᶜ ⦂ `ℕ ⇒ `ℕ
+⊢sucᶜ = ⊢ƛ (⊢suc (⊢` ∋n))
+  where
+  ∋n = Z
+
+⊢2+2ᶜ : ∅ ⊢ plusᶜ · twoᶜ · twoᶜ · sucᶜ · `zero ⦂ `ℕ
+⊢2+2ᶜ = ⊢plusᶜ · ⊢twoᶜ · ⊢twoᶜ · ⊢sucᶜ · ⊢zero
+-Agda-}
+
+\func has-type-plus-c {G : Context} {A : Type} : G ⊢ (plus-c, Ch A ==> Ch A ==> Ch A) =>
+  run {
+    arr-intro,
+    arr-intro,
+    arr-intro,
+    arr-intro,
+    arr-elim
+        (arr-elim
+            (in-ctx-axiom (there (there (there here))))
+            (in-ctx-axiom (there here)))
+        (arr-elim
+            (arr-elim
+                (in-ctx-axiom (there (there here)))
+                (in-ctx-axiom (there here)))
+            (in-ctx-axiom here))
+  }
+
+\func has-type-suc-c {G : Context} : G ⊢ (suc-c, Nat' ==> Nat') =>
+  run {
+    arr-intro,
+    nat-intro2,
+    in-ctx-axiom here
+  }
+
+\func has-type-2+2-c : ∅ ⊢ (plus-c ∙ two-c ∙ two-c ∙ suc-c ∙ zero', Nat') =>
+  arr-elim (arr-elim (arr-elim (arr-elim has-type-plus-c has-type-two-c) has-type-two-c) has-type-suc-c) nat-intro1
+
+{-Agda-
+∋-injective : ∀ {Γ x A B} → Γ ∋ x ⦂ A → Γ ∋ x ⦂ B → A ≡ B
+∋-injective Z        Z          =  refl
+∋-injective Z        (S x≢ _)   =  ⊥-elim (x≢ refl)
+∋-injective (S x≢ _) Z          =  ⊥-elim (x≢ refl)
+∋-injective (S _ ∋x) (S _ ∋x′)  =  ∋-injective ∋x ∋x′
+-Agda-}
+
+\func InContext-injective {G : Context} {x : Id} {A B : Type} (_ : G ∋ (x, A)) (_ : G ∋ (x, B)) : A = B
+  | {cons-ctx G ((_, C))}, Here _ A=C, Here _ B=C => A=C *> inv B=C
+  | {cons-ctx G ((y, _))}, Here x=y _, There x/=y _ => contradiction
+  | {cons-ctx G ((y, _))}, There x/=y _, Here x=y _ => contradiction
+  | {cons-ctx G ((y, C))}, There _ p1, There _ p2 => InContext-injective p1 p2
+
+{-Agda-
+nope₁ : ∀ {A} → ¬ (∅ ⊢ `zero · `suc `zero ⦂ A)
+nope₁ (() · _)
+-Agda-}
+
+\func nope1 {A : Type} : Not (∅ ⊢ (zero' ∙ suc' zero', A)) => \case __ \with {
+  | arr-elim () _
+}
+
+{-Agda-
+nope₂ : ∀ {A} → ¬ (∅ ⊢ ƛ "x" ⇒ ` "x" · ` "x" ⦂ A)
+nope₂ (⊢ƛ (⊢` ∋x · ⊢` ∋x′))  =  contradiction (∋-injective ∋x ∋x′)
+  where
+  contradiction : ∀ {A B} → ¬ (A ⇒ B ≡ A)
+  contradiction ()
+-Agda-}
+
+\func nope2 {A : Type} (_ : ∅ ⊢ (lam X (ref X ∙ ref X), A)) : Empty
+  | {arr A1 A2}, arr-intro (arr-elim (in-ctx-axiom h1) (in-ctx-axiom h2)) =>
+    arr-type-/=-type $ InContext-injective h1 h2
+  \where {
+    -- TODO Arend cannot infer this
+    \func arr-type-/=-type {A B : Type} (p : A ==> B = A) : Empty => {?}
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func has-type-mul {G : Context} : G ⊢ (mul, Nat' ==> Nat' ==> Nat') =>
+  run {
+    fixpoint-axiom,
+    arr-intro,
+    arr-intro,
+    nat-elim
+        (in-ctx-axiom (there here))
+        nat-intro1
+        (arr-elim
+            (arr-elim has-type-plus (in-ctx-axiom (there here)))
+            (arr-elim
+                (arr-elim
+                    (in-ctx-axiom (there (there (there here))))
+                    (in-ctx-axiom here))
+                (in-ctx-axiom (there here))))
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func has-type-mul-c {G : Context} {A : Type} : G ⊢ (mul-c2, Ch A ==> Ch A ==> Ch A) =>
+  run {
+    arr-intro,
+    arr-intro,
+    arr-intro,
+    arr-intro,
+    arr-elim
+        (arr-elim
+            (in-ctx-axiom (there $ there $ there here))
+            (arr-elim
+                (in-ctx-axiom (there $ there here))
+                (in-ctx-axiom (there here))))
+        (in-ctx-axiom here)
+  }

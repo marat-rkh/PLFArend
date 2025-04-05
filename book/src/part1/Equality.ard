@@ -1,0 +1,472 @@
+{-Agda-
+data _≡_ {A : Set} (x : A) : A → Set where
+  refl : x ≡ x
+-Agda-}
+
+-- Arend is based on HoTT, and equality is not that simple here. See `=` in Prelude.ard.
+-- We will use it here.
+
+{-Agda-
+sym : ∀ {A : Set} {x y : A}
+  → x ≡ y
+    -----
+  → y ≡ x
+sym refl = refl
+-Agda-}
+
+\func sym {A : \Type} {x y : A} (x=y : x = y) : y = x
+  | idp => idp
+
+{-Agda-
+trans : ∀ {A : Set} {x y z : A}
+  → x ≡ y
+  → y ≡ z
+    -----
+  → x ≡ z
+trans refl refl  =  refl
+-Agda-}
+
+\func trans {A : \Type} {x y z : A} (x=y : x = y) (y=z : y = z) : x = z
+  | idp, idp => idp
+
+{-Agda-
+cong : ∀ {A B : Set} (f : A → B) {x y : A}
+  → x ≡ y
+    ---------
+  → f x ≡ f y
+cong f refl  =  refl
+-Agda-}
+
+\func cong {A B : \Type} (f : A -> B) {x y : A} (x=y : x = y) : f x = f y \elim x=y
+  | idp => idp
+
+{-Agda-
+cong₂ : ∀ {A B C : Set} (f : A → B → C) {u x : A} {v y : B}
+  → u ≡ x
+  → v ≡ y
+    -------------
+  → f u v ≡ f x y
+cong₂ f refl refl  =  refl
+-Agda-}
+
+\func cong2 {A B C : \Type} (f : A -> B -> C) {u x : A} {v y : B} (u=x : u = x) (v=y : v = y) : f u v = f x y
+\elim u=x, v=y
+  | idp, idp => idp
+
+{-Agda-
+cong-app : ∀ {A B : Set} {f g : A → B}
+  → f ≡ g
+    ---------------------
+  → ∀ (x : A) → f x ≡ g x
+cong-app refl x = refl
+-Agda-}
+
+\func cong-app {A B : \Type} {f g : A -> B} (f=g : f = g) (x : A) : f x = g x \elim f=g
+  | idp => idp
+
+{-Agda-
+subst : ∀ {A : Set} {x y : A} (P : A → Set)
+  → x ≡ y
+    ---------
+  → P x → P y
+subst P refl px = px
+-Agda-}
+
+\func subst {A : \Type} {x y : A} (P : A -> \Type) (x=y : x = y) (px : P x) : P y \elim x=y
+  | idp => px
+
+{-Agda-
+module ≡-Reasoning {A : Set} where
+
+  infix  1 begin_
+  infixr 2 _≡⟨⟩_ _≡⟨_⟩_
+  infix  3 _∎
+
+  begin_ : ∀ {x y : A}
+    → x ≡ y
+      -----
+    → x ≡ y
+  begin x≡y  =  x≡y
+
+  _≡⟨⟩_ : ∀ (x : A) {y : A}
+    → x ≡ y
+      -----
+    → x ≡ y
+  x ≡⟨⟩ x≡y  =  x≡y
+
+  _≡⟨_⟩_ : ∀ (x : A) {y z : A}
+    → x ≡ y
+    → y ≡ z
+      -----
+    → x ≡ z
+  x ≡⟨ x≡y ⟩ y≡z  =  trans x≡y y≡z
+
+  _∎ : ∀ (x : A)
+      -----
+    → x ≡ x
+  x ∎  =  refl
+
+open ≡-Reasoning
+-Agda-}
+
+\module =-Reasoning \where {
+  \func begin {A : \Type} {x y : A} (x=y : x = y) : x = y => x=y
+
+  \func \infixr 2 =<>= {A : \Type} (x : A) {y : A} (x=y : x = y) : x = y => x=y
+
+  \func \infix 3 ==< {A : \Type} (x : A) {y : A} (x=y : x = y) : x = y => x=y
+
+  \func \infixr 2 >== {A : \Type} {x y z : A} (x=y : x = y) (y=z : y = z) : x = z => trans x=y y=z
+
+  \func \fix 3 qed {A : \Type} (x : A) : x = x => idp
+}
+
+\open =-Reasoning
+
+{-Agda-
+trans′ : ∀ {A : Set} {x y z : A}
+  → x ≡ y
+  → y ≡ z
+    -----
+  → x ≡ z
+trans′ {A} {x} {y} {z} x≡y y≡z =
+  begin
+    x
+  ≡⟨ x≡y ⟩
+    y
+  ≡⟨ y≡z ⟩
+    z
+  ∎
+-Agda-}
+
+\import Function.Meta ($)
+
+\func trans' {A : \Type} {x y z : A} (x=y : x = y) (y=z : y = z) : x = z =>
+  begin $
+  x ==< x=y >==
+  y ==< y=z >==
+  z `qed
+
+-- We will not use `begin` below, it doesn't add much.
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+-- Your code goes here
+
+{-Agda-
+data ℕ : Set where
+  zero : ℕ
+  suc  : ℕ → ℕ
+
+_+_ : ℕ → ℕ → ℕ
+zero    + n  =  n
+(suc m) + n  =  suc (m + n)
+-Agda-}
+
+-- As we use standard equality here, we can simply import definitions.
+
+\open Nat (+)
+
+{-Agda-
+postulate
+  +-identity : ∀ (m : ℕ) → m + zero ≡ m
+  +-suc : ∀ (m n : ℕ) → m + suc n ≡ suc (m + n)
+-Agda-}
+
+-- Arend doesn't have this. And we don't need them because the typechecker is smart enough.
+
+{-Agda-
++-comm : ∀ (m n : ℕ) → m + n ≡ n + m
++-comm m zero =
+  begin
+    m + zero
+  ≡⟨ +-identity m ⟩
+    m
+  ≡⟨⟩
+    zero + m
+  ∎
++-comm m (suc n) =
+  begin
+    m + suc n
+  ≡⟨ +-suc m n ⟩
+    suc (m + n)
+  ≡⟨ cong suc (+-comm m n) ⟩
+    suc (n + m)
+  ≡⟨⟩
+    suc n + m
+  ∎
+-Agda-}
+
+\func +-comm (m n : Nat) : m + n = n + m \elim n
+  | 0 =>
+    m + 0 =<>=
+    m =<>=
+    0 + m `qed
+  | suc n =>
+    m + suc n =<>=
+    suc (m + n) ==< cong suc (+-comm m n) >==
+    suc (n + m) =<>=
+    suc n + m `qed
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import Order.PartialOrder (Preorder)
+\open Preorder (<=, <=-reflexive, <=-transitive)
+
+\module <=-Reasoning \where {
+  \func \infixr 2 <=[] {A : Preorder} (x : A) {y : A} (x<=y : x <= y) : x <= y => x<=y
+
+  \func \infix 3 <=[ {A : Preorder} (x : A) {y : A} (x<=y : x <= y) : x <= y => x<=y
+
+  \func \infixr 2 ]<= {A : Preorder} {x y z : A} (x<=y : x <= y) (y<=z : y <= z) : x <= z => <=-transitive x<=y y<=z
+
+  \func \fix 3 <=qed {A : Preorder} (x : A) : x <= x => <=-reflexive
+}
+
+\import Order.PartialOrder (<=)
+\import Arith.Nat (NatSemiring, suc<=suc)
+\open <=-Reasoning
+\import Function.Meta ($)
+\import Paths.Meta (rewrite)
+
+\func +-mono-right-<= (n p q : Nat) (p<=q : p <= q) : n + p <= n + q \elim n
+  | 0 =>
+    0 + p <=[]
+    p <=[ p<=q ]<=
+    q <=[]
+    0 + q `<=qed
+  | suc n =>
+    suc n + p <=[]
+    suc (n + p) <=[ suc<=suc (+-mono-right-<= n p q p<=q) ]<=
+    suc (n + q) <=[]
+    suc n + q `<=qed
+
+\func +-mono-left-<= (m n p : Nat) (m<=n : m <= n) : m + p <= n + p =>
+  rewrite (+-comm m p) $
+  rewrite (+-comm n p) $
+  p + m <=[ +-mono-right-<= p m n m<=n ]<=
+  p + n `<=qed
+
+\func +-mono-<= (m n p q : Nat) (m<=n : m <= n) (p<=q : p <= q) : m + p <= n + q =>
+  m + p <=[ +-mono-left-<= m n p m<=n ]<=
+  n + p <=[ +-mono-right-<= n p q p<=q ]<=
+  n + q `<=qed
+
+{-Agda-
+data even : ℕ → Set
+data odd  : ℕ → Set
+
+data even where
+
+  even-zero : even zero
+
+  even-suc : ∀ {n : ℕ}
+    → odd n
+      ------------
+    → even (suc n)
+
+data odd where
+  odd-suc : ∀ {n : ℕ}
+    → even n
+      -----------
+    → odd (suc n)
+-Agda-}
+
+\data even Nat : \Type \with
+  | 0 => zero-even
+  | suc n => suc-even (odd n)
+
+\data odd Nat : \Type \with
+  | suc n => suc-odd (even n)
+
+{-Agda-
+{-# BUILTIN EQUALITY _≡_ #-}
+-Agda-}
+
+-- We already use the builtin equality.
+
+{-Agda-
+even-comm : ∀ (m n : ℕ)
+  → even (m + n)
+    ------------
+  → even (n + m)
+even-comm m n ev  rewrite +-comm n m  =  ev
+-Agda-}
+
+\func even-comm (m n : Nat) (e : even (m + n)) : even (n + m) => rewrite (+-comm n m) e
+
+{-Agda-
++-comm′ : ∀ (m n : ℕ) → m + n ≡ n + m
++-comm′ zero    n  rewrite +-identity n             =  refl
++-comm′ (suc m) n  rewrite +-suc n m | +-comm′ m n  =  refl
+-Agda-}
+
+\func +-comm' (m n : Nat) : m + n = n + m \elim m
+  | 0 => idp
+  | suc m => rewrite (+-comm' m n) idp
+
+{-Agda-
+even-comm′ : ∀ (m n : ℕ)
+  → even (m + n)
+    ------------
+  → even (n + m)
+even-comm′ m n ev with   m + n  | +-comm m n
+...                  | .(n + m) | refl       = ev
+-Agda-}
+
+\import Meta (cases)
+
+\func even-comm' (m n : Nat) (e : even (m + n)) : even (n + m) => cases (n + m, +-comm m n) \with {
+  | _, idp => e
+}
+
+{-Agda-
+even-comm″ : ∀ (m n : ℕ)
+  → even (m + n)
+    ------------
+  → even (n + m)
+even-comm″ m n  =  subst even (+-comm m n)
+-Agda-}
+
+\func even-comm'' (m n : Nat) : even (m + n) -> even (n + m) => subst even (+-comm m n)
+
+{-Agda-
+_≐_ : ∀ {A : Set} (x y : A) → Set₁
+_≐_ {A} x y = ∀ (P : A → Set) → P x → P y
+-Agda-}
+
+-- (!) Levels are inferred automatically, so we can actually write \Type everywhere.
+
+\func \infix 1 ='= {A : \Type0} (x y : A) : \Type1 =>
+  \Pi (P : A -> \Type0) -> P x -> P y
+
+{-Agda-
+refl-≐ : ∀ {A : Set} {x : A}
+  → x ≐ x
+refl-≐ P Px  =  Px
+
+trans-≐ : ∀ {A : Set} {x y z : A}
+  → x ≐ y
+  → y ≐ z
+    -----
+  → x ≐ z
+trans-≐ x≐y y≐z P Px  =  y≐z P (x≐y P Px)
+-Agda-}
+
+\func refl-='= {A : \Type0} {x : A} : x ='= x =>
+  \lam P Px => Px
+
+\func trans-='= {A : \Type0} {x y z : A} (x=y : x ='= y) (y=z : y ='= z) : x ='= z =>
+  \lam P Px => y=z P (x=y P Px)
+
+{-Agda-
+sym-≐ : ∀ {A : Set} {x y : A}
+  → x ≐ y
+    -----
+  → y ≐ x
+sym-≐ {A} {x} {y} x≐y P  =  Qy
+  where
+    Q : A → Set
+    Q z = P z → P x
+    Qx : Q x
+    Qx = refl-≐ P
+    Qy : Q y
+    Qy = x≐y Q Qx
+-Agda-}
+
+\func sym-='= {A : \Type0} {x y : A} (x=y : x ='= y) : y ='= x => \lam P =>
+    \let
+      | Q : A -> \Type0 => \lam z => P z -> P x
+      | Qx : Q x => refl-='= P
+      | Qy : Q y => x=y Q Qx
+    \in Qy
+
+{-Agda-
+≡-implies-≐ : ∀ {A : Set} {x y : A}
+  → x ≡ y
+    -----
+  → x ≐ y
+≡-implies-≐ x≡y P  =  subst P x≡y
+-Agda-}
+
+\func =-implies-='= {A : \Type0} {x y : A} (x=y : x = y) : x ='= y =>
+  \lam P => subst P x=y
+
+{-Agda-
+≐-implies-≡ : ∀ {A : Set} {x y : A}
+  → x ≐ y
+    -----
+  → x ≡ y
+≐-implies-≡ {A} {x} {y} x≐y  =  Qy
+  where
+    Q : A → Set
+    Q z = x ≡ z
+    Qx : Q x
+    Qx = refl
+    Qy : Q y
+    Qy = x≐y Q Qx
+-Agda-}
+
+\func ='=-implies-= {A : \Type0} {x y : A} (x=y : x ='= y) : x = y =>
+  \let
+    | Q : A -> \Type0 => \lam z => x = z
+    | Qx : Q x => idp
+    | Qy : Q y => x=y Q Qx
+  \in Qy
+
+{-Agda-
+open import Level using (Level; _⊔_) renaming (zero to lzero; suc to lsuc)
+-Agda-}
+
+-- Arend uses keywords for the same purposes: \lp, 0, \suc l, \max l1 l2.
+-- See: https://arend-lang.github.io/documentation/language-reference/expressions/universes#level-polymorphism
+
+{-Agda-
+data _≡′_ {ℓ : Level} {A : Set ℓ} (x : A) : A → Set ℓ where
+  refl′ : x ≡′ x
+-Agda-}
+
+-- We use a builtin equality, it is also universe polymorphic.
+
+{-Agda-
+sym′ : ∀ {ℓ : Level} {A : Set ℓ} {x y : A}
+  → x ≡′ y
+    ------
+  → y ≡′ x
+sym′ refl′ = refl′
+-Agda-}
+
+-- Our definition of the `sym` above is already polymorphic, the level is inferred automatically.
+-- The definition below is equivalent to the original one.
+
+\func sym' {A : \Type \lp} {x y : A} (x=y : x = y) : y = x
+  | idp => idp
+
+{-Agda-
+_≐′_ : ∀ {ℓ : Level} {A : Set ℓ} (x y : A) → Set (lsuc ℓ)
+_≐′_ {ℓ} {A} x y = ∀ (P : A → Set ℓ) → P x → P y
+-Agda-}
+
+\func \infix 1 ='=' {A : \Type \lp} (x y : A) : \Type (\suc \lp) =>
+  \Pi (P : A -> \Type \lp) -> P x -> P y
+
+{-Agda-
+_∘_ : ∀ {ℓ₁ ℓ₂ ℓ₃ : Level} {A : Set ℓ₁} {B : Set ℓ₂} {C : Set ℓ₃}
+  → (B → C) → (A → B) → A → C
+(g ∘ f) x  =  g (f x)
+-Agda-}
+
+\func \infixr 8 o {A B C : \Type} (g : B -> C) (f : A -> B) : A -> C =>
+  \lam x => g (f x)
+
+{-Agda-
+-- import Relation.Binary.PropositionalEquality as Eq
+-- open Eq using (_≡_; refl; trans; sym; cong; cong-app; subst)
+-- open Eq.≡-Reasoning using (begin_; _≡⟨⟩_; step-≡; _∎)
+-Agda-}
+
+-- \import Paths (*>, inv, pmap, transport, ==<, >==, qed)

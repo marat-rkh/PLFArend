@@ -1,0 +1,5 @@
+langVersion: 1.10
+version: 0.5
+sourcesDir: src
+binariesDir: bin
+dependencies: [ arend-lib ]

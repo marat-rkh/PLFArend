@@ -1,0 +1,284 @@
+{-Agda-
+open import Relation.Binary.PropositionalEquality using (_≡_; refl)
+open import Data.Nat using (ℕ; zero; suc)
+open import Data.Empty using (⊥; ⊥-elim)
+open import Data.Sum using (_⊎_; inj₁; inj₂)
+open import Data.Product using (_×_)
+open import plfa.part1.Isomorphism using (_≃_; extensionality)
+-Agda-}
+
+\import Logic (Empty, absurd, ||, byLeft, byRight)
+\import util.Logic (&&)
+\import util.Equiv (=~)
+\import part1.Isomorphism (extensionality)
+
+{-Agda-
+¬_ : Set → Set
+¬ A = A → ⊥
+-Agda-}
+
+\func \fix 4 Not (A : \Type) : \Prop => A -> Empty
+
+{-Agda-
+¬-elim : ∀ {A : Set}
+  → ¬ A
+  → A
+    ---
+  → ⊥
+¬-elim ¬x x = ¬x x
+-Agda-}
+
+\func Not-elim {A : \Type} (not-x : Not A) (x : A) : Empty => not-x x
+
+{-Agda-
+¬¬-intro : ∀ {A : Set}
+  → A
+    -----
+  → ¬ ¬ A
+¬¬-intro x  =  λ{¬x → ¬x x}
+-Agda-}
+
+\func Not-Not-intro {A : \Type} (x : A) : Not (Not A) => \lam not-x => not-x x
+
+{-Agda-
+¬¬-intro′ : ∀ {A : Set}
+  → A
+    -----
+  → ¬ ¬ A
+¬¬-intro′ x ¬x = ¬x x
+-Agda-}
+
+\func Not-Not-intro' {A : \Type} (x : A) (not-x : Not A) : Empty => not-x x
+
+{-Agda-
+¬¬¬-elim : ∀ {A : Set}
+  → ¬ ¬ ¬ A
+    -------
+  → ¬ A
+¬¬¬-elim ¬¬¬x  =  λ x → ¬¬¬x (¬¬-intro x)
+-Agda-}
+
+\func Not-Not-Not-elim {A : \Type} (not-not-not-x : Not (Not (Not A))) : Not A =>
+  \lam x => not-not-not-x (Not-Not-intro x)
+
+{-Agda-
+contraposition : ∀ {A B : Set}
+  → (A → B)
+    -----------
+  → (¬ B → ¬ A)
+contraposition f ¬y x = ¬y (f x)
+-Agda-}
+
+\func contraposition {A B : \Type} (f : A -> B) : Not B -> Not A =>
+  \lam not-y x => not-y (f x)
+
+{-Agda-
+_≢_ : ∀ {A : Set} → A → A → Set
+x ≢ y  =  ¬ (x ≡ y)
+-Agda-}
+
+\func \infix 1 /= {A : \Type} (x y : A) : \Prop => Not (x = y)
+
+{-Agda-
+_ : 1 ≢ 2
+_ = λ()
+-Agda-}
+
+\func [1/=2] : 1 /= 2 => \case __ \with {}
+
+{-Agda-
+peano : ∀ {m : ℕ} → zero ≢ suc m
+peano = λ()
+-Agda-}
+
+\func peano {m : Nat} : 0 /= suc m => \case __ \with {}
+
+{-Agda-
+id : ⊥ → ⊥
+id x = x
+
+id′ : ⊥ → ⊥
+id′ ()
+-Agda-}
+
+\func id (e : Empty) : Empty => e
+
+\func id' (e : Empty) : Empty
+
+{-Agda-
+id≡id′ : id ≡ id′
+id≡id′ = extensionality (λ())
+-Agda-}
+
+\func id=id' : id = id' => extensionality (\case __ \with {})
+
+{-Agda-
+assimilation : ∀ {A : Set} (¬x ¬x′ : ¬ A) → ¬x ≡ ¬x′
+assimilation ¬x ¬x′ = extensionality (λ x → ⊥-elim (¬x x))
+-Agda-}
+
+\func assimilation {A : \Type} (not-x not-x' : Not A) : not-x = not-x' =>
+  extensionality (\lam x => absurd (not-x x))
+
+-- In Arend, we use `\Prop` to encode logic. Types in `\Prop` have at most one element by definition.
+-- Builtin function `Path.inProp` states exactly that:
+
+\func assimilation' {A : \Type} (not-x not-x' : Not A) : not-x = not-x' => Path.inProp not-x not-x'
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import part1.Relations (<, s<s, z<s)
+
+\func <-irreflexive {n : Nat} (n<n : n < n) : Empty
+  | {0}, ()
+  | {suc n}, s<s n<n => <-irreflexive n<n
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import Arith.Nat (pred)
+\import Paths (pmap, inv)
+
+\func less=>not-eq {m n : Nat} (m<n : m < n) : m /= n
+  | {0}, {suc n}, z<s => peano
+  | {suc m}, {suc n}, s<s m<n => \lam sm=sn => less=>not-eq m<n (pmap pred sm=sn)
+
+\func less=>not-greater {m n : Nat} (le : m < n) : Not (n < m)
+  | {0}, {suc n}, z<s => \case __ \with {}
+  | {suc m}, {suc n}, s<s m<n => \lam sn<sm => less=>not-greater m<n (m<n-pred sn<sm)
+
+\func eq=>not-less {m n : Nat} (m=n : m = n) : Not (m < n)
+  | {0}, {0}, m=n => \case __ \with {}
+  | {suc m}, {suc n}, m=n => \lam sm<sn => eq=>not-less {m} {n} (pmap pred m=n) (m<n-pred sm<sn)
+
+\func eq=>not-greater {m n : Nat} (m=n : m = n) : Not (n < m)
+  | {0}, {0}, m=n => \case __ \with {}
+  | {suc m}, {suc n}, m=n => \lam sn<sm => eq=>not-greater {m} {n} (pmap pred m=n) (m<n-pred sn<sm)
+
+\func greater=>not-less {m n : Nat} (gt : n < m) : Not (m < n) => less=>not-greater gt
+
+\func greater=>not-eq {m n : Nat} (gt : n < m) : m /= n => \lam m=n => less=>not-eq gt (inv m=n)
+
+\func m<n-pred {m n : Nat} (sm<sn : suc m < suc n) : m < n
+  | s<s m<n => m<n
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+-- The statement we need to prove is a special case of `part1.Connectives.->-distrib-u`.
+-- But we can easily prove equality without using it.
+
+\import Logic (propExt)
+\open && (prod, proj1, proj2)
+
+\func ||-dual-&& {A B : \Prop} : Not (A || B) = Not A && Not B => propExt to from
+  \where {
+    \func to {A B : \Prop} (p : Not (A || B)) : Not A && Not B =>
+      prod (\lam a => p (byLeft a)) (\lam b => p (byRight b))
+
+    \func from {A B : \Prop} (p : Not A && Not B) : Not (A || B)
+      | prod not-a not-b => \lam ab => \case ab \with {
+        | byLeft a => not-a a
+        | byRight b => not-b b
+      }
+  }
+
+-- `Not (A && B) = Not A || Not B` is not provable in constructive mathematics.
+-- But we can prove that the right side implies the left one.
+
+\func &&-dual-||-from {A B : \Prop} (p : Not A || Not B) : Not (A && B)
+  | byLeft not-a => \lam ab => not-a (proj1 ab)
+  | byRight not-b => \lam ab => not-b (proj2 ab)
+
+{-Agda-
+em-irrefutable : ∀ {A : Set} → ¬ ¬ (A ⊎ ¬ A)
+em-irrefutable = λ k → k (inj₂ (λ x → k (inj₁ x)))
+-Agda-}
+
+\func em-irrefutable {A : \Prop} : Not (Not (A || Not A)) =>
+  \lam k => k (byRight (\lam x => k (byLeft x)))
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func em=dne : (\Pi (A : \Prop) -> A || Not A) = (\Pi (A : \Prop) -> Not (Not A) -> A) =>
+  propExt [=>] [<=]
+  \where {
+    \func [=>] (em : \Pi (A : \Prop) -> A || Not A) : \Pi (A : \Prop) -> Not (Not A) -> A =>
+      \lam A => \case em A \with {
+        | byLeft a => \lam _ => a
+        | byRight not-a => \lam not-not-a => absurd (not-not-a not-a)
+      }
+
+    \func [<=] (dne : \Pi (A : \Prop) -> Not (Not A) -> A) : \Pi (A : \Prop) -> A || Not A =>
+      \lam A => dne (A || Not A) em-irrefutable
+  }
+
+\func em=pl : (\Pi (A : \Prop) -> A || Not A) = (\Pi (A B : \Prop) -> ((A -> B) -> A) -> A) =>
+  propExt [=>] [<=]
+  \where {
+    \func [=>] (em : \Pi (A : \Prop) -> A || Not A) : \Pi (A B : \Prop) -> ((A -> B) -> A) -> A =>
+      \lam A B a->b->a => \case em A \with {
+        | byLeft a => a
+        | byRight not-a => a->b->a (\lam a => absurd (not-a a))
+      }
+
+    \func [<=] (pl : \Pi (A B : \Prop) -> ((A -> B) -> A) -> A) : \Pi (A : \Prop) -> A || Not A =>
+      \lam A => pl (A || Not A) Empty (\lam p => absurd (em-irrefutable p))
+  }
+
+\func em=iad : (\Pi (A : \Prop) -> A || Not A) = (\Pi (A B : \Prop) -> (A -> B) -> Not A || B) =>
+  propExt [=>] [<=]
+  \where {
+    \func [=>] (em : \Pi (A : \Prop) -> A || Not A) : \Pi (A B : \Prop) -> (A -> B) -> Not A || B =>
+      \lam A B a->b => \case em A \with {
+        | byLeft a => byRight (a->b a)
+        | byRight not-a => byLeft not-a
+      }
+
+    \func [<=] (iad : \Pi (A B : \Prop) -> (A -> B) -> Not A || B) : \Pi (A : \Prop) -> A || Not A =>
+      \lam A => \let not-a||a => iad A A (\lam a => a) \in \case not-a||a \with {
+        | byLeft not-a => byRight not-a
+        | byRight a => byLeft a
+      }
+  }
+
+\func em=dm : (\Pi (A : \Prop) -> A || Not A) = (\Pi (A B : \Prop) -> Not (Not A && Not B) -> A || B) =>
+  propExt [=>] [<=]
+  \where {
+    \func [=>] (em : \Pi (A : \Prop) -> A || Not A) : \Pi (A B : \Prop) -> Not (Not A && Not B) -> A || B =>
+      \lam A B not-a&&not-b->empty => \case em A, em B \with {
+        | byLeft a, _ => byLeft a
+        | _, byLeft b => byRight b
+        | byRight not-a, byRight npt-b => absurd (not-a&&not-b->empty (prod not-a npt-b))
+      }
+
+    \func [<=] (dm : \Pi (A B : \Prop) -> Not (Not A && Not B) -> A || B) : \Pi (A : \Prop) -> A || Not A =>
+      \lam A => dm A (Not A) (\lam (prod not-a not-not-a) => not-not-a not-a)
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func Stable (A : \Prop) : \Prop => Not (Not A) -> A
+
+\func neg-Stable (A : \Prop) : Stable (Not A) =>
+  \lam not-not-not-a a => Not-Not-Not-elim not-not-not-a a
+
+\func conj-Stable {A B : \Prop} (sa : Stable A) (sb : Stable B) : Stable (A && B) =>
+  \lam not-not-ab => prod
+      (sa (\lam not-a => not-not-ab (\lam ab => not-a (proj1 ab))))
+      (sb (\lam not-b => not-not-ab (\lam ab => not-b (proj2 ab))))
+
+{-Agda-
+import Relation.Nullary using (¬_)
+import Relation.Nullary.Negation using (contraposition)
+-Agda-}
+
+\import Logic (Not)

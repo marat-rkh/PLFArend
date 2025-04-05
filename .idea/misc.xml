@@ -17,6 +17,7 @@
         <option name="showTypesInLambda" value="true" />
       </ArendPrintingOptions>
     </option>
+    <option name="librariesRoot" value="$USER_HOME$/.arend/libs" />
     <option name="showImplicitGoals" value="true" />
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_20" default="true" project-jdk-name="20" project-jdk-type="JavaSDK">

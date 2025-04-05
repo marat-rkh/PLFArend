@@ -1,0 +1,554 @@
+{-Agda-
+import Relation.Binary.PropositionalEquality as Eq
+open Eq using (_≡_; refl; cong)
+open import Data.Nat using (ℕ; zero; suc; _+_)
+open import Data.Nat.Properties using (+-comm; +-identityʳ)
+-Agda-}
+
+\import Paths (pmap)
+\open Nat (+)
+\import Arith.Nat (NatSemiring)
+\open NatSemiring (+-comm)
+
+{-Agda-
+data _≤_ : ℕ → ℕ → Set where
+
+  z≤n : ∀ {n : ℕ}
+      --------
+    → zero ≤ n
+
+  s≤s : ∀ {m n : ℕ}
+    → m ≤ n
+      -------------
+    → suc m ≤ suc n
+-Agda-}
+
+-- Note that each constructor has `m` and `n` as implicit parameters.
+
+\data \infix 4 <= Nat Nat \with
+  | 0, _ => z<=n
+  | suc m, suc n => s<=s (m <= n)
+
+{-Agda-
+_ : 2 ≤ 4
+_ = s≤s (s≤s z≤n)
+-Agda-}
+
+\func [2<=4] : 2 <= 4 => s<=s (s<=s z<=n)
+
+{-Agda-
+_ : 2 ≤ 4
+_ = s≤s {1} {3} (s≤s {0} {2} (z≤n {2}))
+-Agda-}
+
+\func [2<=4]' : 2 <= 4 => s<=s {1} {3} (s<=s {0} {2} (z<=n {2}))
+
+{-Agda-
+_ : 2 ≤ 4
+_ = s≤s {m = 1} {n = 3} (s≤s {m = 0} {n = 2} (z≤n {n = 2}))
+-Agda-}
+
+-- Arend doesn't have this.
+
+{-Agda-
+_ : 2 ≤ 4
+_ = s≤s {n = 3} (s≤s {n = 2} z≤n)
+-Agda-}
+
+-- Arend doesn't have this.
+
+{-Agda-
++-identityʳ′ : ∀ {m : ℕ} → m + zero ≡ m
++-identityʳ′ = +-identityʳ _
+-Agda-}
+
+\import part1.Induction (+-identity-left)
+
+\func +-identity-left' {m : Nat} : 0 + m = m => +-identity-left _
+
+{-Agda-
+infix 4 _≤_
+-Agda-}
+
+-- As we have seen above, precedence is declared as a part of the data declaration in Arend.
+
+{-Agda-
+inv-s≤s : ∀ {m n : ℕ}
+  → suc m ≤ suc n
+    -------------
+  → m ≤ n
+inv-s≤s (s≤s m≤n) = m≤n
+-Agda-}
+
+\func inv-s<=s {m n : Nat} (p : suc m <= suc n) : m <= n \elim p
+  | s<=s m<=n => m<=n
+
+{-Agda-
+inv-z≤n : ∀ {m : ℕ}
+  → m ≤ zero
+    --------
+  → m ≡ zero
+inv-z≤n z≤n = refl
+-Agda-}
+
+-- TODO Agda seems to be a bit smarter here.
+
+\func inv-z<=n {m : Nat} (p : m <= 0) : m = 0 \elim m
+  | 0 => idp
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+-- Your code goes here
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+-- Your code goes here
+
+{-Agda-
+≤-refl : ∀ {n : ℕ}
+    -----
+  → n ≤ n
+≤-refl {zero} = z≤n
+≤-refl {suc n} = s≤s ≤-refl
+-Agda-}
+
+\func <=-refl {n : Nat} : n <= n
+  | {0} => z<=n
+  | {suc n} => s<=s <=-refl
+
+{-Agda-
+≤-trans : ∀ {m n p : ℕ}
+  → m ≤ n
+  → n ≤ p
+    -----
+  → m ≤ p
+≤-trans z≤n       _          =  z≤n
+≤-trans (s≤s m≤n) (s≤s n≤p)  =  s≤s (≤-trans m≤n n≤p)
+-Agda-}
+
+-- TODO Agda can pattern match on constructors directly here, Arend cannot.
+-- See: https://github.com/JetBrains/Arend/issues/286
+
+\func <=-trans {m n p : Nat} (m<=n : m <= n) (n<=p : n <= p) : m <= p
+  | {0}, _, _ => z<=n
+  | {suc m}, {suc n}, {suc p}, s<=s m<=n, s<=s n<=p => s<=s (<=-trans m<=n n<=p)
+
+{-Agda-
+≤-trans′ : ∀ (m n p : ℕ)
+  → m ≤ n
+  → n ≤ p
+    -----
+  → m ≤ p
+≤-trans′ zero    _       _       z≤n       _          =  z≤n
+≤-trans′ (suc m) (suc n) (suc p) (s≤s m≤n) (s≤s n≤p)  =  s≤s (≤-trans′ m n p m≤n n≤p)
+-Agda-}
+
+\func <=-trans' (m n p : Nat) (m<=n : m <= n) (n<=p : n <= p) : m <= p
+  | 0 , _, _, _, _ => z<=n
+  | suc m, suc n, suc p, s<=s m<=n, s<=s n<=p => s<=s (<=-trans m<=n n<=p)
+
+{-Agda-
+≤-antisym : ∀ {m n : ℕ}
+  → m ≤ n
+  → n ≤ m
+    -----
+  → m ≡ n
+≤-antisym z≤n       z≤n        =  refl
+≤-antisym (s≤s m≤n) (s≤s n≤m)  =  cong suc (≤-antisym m≤n n≤m)
+-Agda-}
+
+\func <=-antisym {m n : Nat} (m<=n : m <= n) (n<=m : n <= m) : m = n
+  | {0}, {0}, z<=n, z<=n => idp
+  | {suc n}, {suc m}, s<=s m<=n, s<=s n<=m => pmap suc (<=-antisym m<=n n<=m)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+-- Your code goes here
+
+{-Agda-
+data Total (m n : ℕ) : Set where
+
+  forward :
+      m ≤ n
+      ---------
+    → Total m n
+
+  flipped :
+      n ≤ m
+      ---------
+    → Total m n
+-Agda-}
+
+\data Total (m n : Nat)
+  | forward (m <= n)
+  | flipped (n <= m)
+
+{-Agda-
+data Total′ : ℕ → ℕ → Set where
+
+  forward′ : ∀ {m n : ℕ}
+    → m ≤ n
+      ----------
+    → Total′ m n
+
+  flipped′ : ∀ {m n : ℕ}
+    → n ≤ m
+      ----------
+    → Total′ m n
+-Agda-}
+
+-- Arend doesn't actually have a distinction between indices and parameters.
+
+{-Agda-
+≤-total : ∀ (m n : ℕ) → Total m n
+≤-total zero    n                         =  forward z≤n
+≤-total (suc m) zero                      =  flipped z≤n
+≤-total (suc m) (suc n) with ≤-total m n
+...                        | forward m≤n  =  forward (s≤s m≤n)
+...                        | flipped n≤m  =  flipped (s≤s n≤m)
+-Agda-}
+
+\func <=-total (m n : Nat) : Total m n
+  | 0, n => forward z<=n
+  | suc m, 0 => flipped z<=n
+  | suc m, suc n => \case <=-total m n \with {
+    | forward m<=n => forward (s<=s m<=n)
+    | flipped n<=m => flipped (s<=s n<=m)
+  }
+
+{-Agda-
+≤-total′ : ∀ (m n : ℕ) → Total m n
+≤-total′ zero    n        =  forward z≤n
+≤-total′ (suc m) zero     =  flipped z≤n
+≤-total′ (suc m) (suc n)  =  helper (≤-total′ m n)
+  where
+  helper : Total m n → Total (suc m) (suc n)
+  helper (forward m≤n)  =  forward (s≤s m≤n)
+  helper (flipped n≤m)  =  flipped (s≤s n≤m)
+-Agda-}
+
+\func <=-total' (m n : Nat) : Total m n
+  | 0, n => forward z<=n
+  | suc m, 0 => flipped z<=n
+  | suc m, suc n => helper (<=-total' m n)
+  \where {
+    \func helper {m n : Nat} (t : Total m n) : Total (suc m) (suc n) \elim t
+      | forward m<=n => forward (s<=s m<=n)
+      | flipped n<=m => flipped (s<=s n<=m)
+  }
+
+{-Agda-
+≤-total″ : ∀ (m n : ℕ) → Total m n
+≤-total″ m       zero                      =  flipped z≤n
+≤-total″ zero    (suc n)                   =  forward z≤n
+≤-total″ (suc m) (suc n) with ≤-total″ m n
+...                        | forward m≤n   =  forward (s≤s m≤n)
+...                        | flipped n≤m   =  flipped (s≤s n≤m)
+-Agda-}
+
+\func <=-total'' (m n : Nat) : Total m n
+  | m, 0 => flipped z<=n
+  | 0, suc n => forward z<=n
+  | suc m, suc n => \case <=-total'' m n \with {
+    | forward m<=n => forward (s<=s m<=n)
+    | flipped n<=m => flipped (s<=s n<=m)
+  }
+
+{-Agda-
++-monoʳ-≤ : ∀ (n p q : ℕ)
+  → p ≤ q
+    -------------
+  → n + p ≤ n + q
++-monoʳ-≤ zero    p q p≤q  =  p≤q
++-monoʳ-≤ (suc n) p q p≤q  =  s≤s (+-monoʳ-≤ n p q p≤q)
+-Agda-}
+
+\func +-mono-right-<= (n p q : Nat) (p<=q : p <= q) : n + p <= n + q \elim n
+  | 0 => p<=q
+  | suc n => s<=s (+-mono-right-<= n p q p<=q)
+
+{-Agda-
++-monoˡ-≤ : ∀ (m n p : ℕ)
+  → m ≤ n
+    -------------
+  → m + p ≤ n + p
++-monoˡ-≤ m n p m≤n  rewrite +-comm m p | +-comm n p  = +-monoʳ-≤ p m n m≤n
+-Agda-}
+
+\import Function.Meta ($)
+\import Paths.Meta (rewrite)
+
+\func +-mono-left-<= (m n p : Nat) (m<=n : m <= n) : m + p <= n + p =>
+  rewrite (+-comm {m} {p}) $ rewrite (+-comm {n} {p}) $ +-mono-right-<= p m n m<=n
+
+{-Agda-
++-mono-≤ : ∀ (m n p q : ℕ)
+  → m ≤ n
+  → p ≤ q
+    -------------
+  → m + p ≤ n + q
++-mono-≤ m n p q m≤n p≤q  =  ≤-trans (+-monoˡ-≤ m n p m≤n) (+-monoʳ-≤ n p q p≤q)
+-Agda-}
+
+\func +-mono-<= (m n p q : Nat) (m<=n : m <= n) (p<=q : p <= q) : m + p <= n + q =>
+  <=-trans (+-mono-left-<= m n p m<=n) (+-mono-right-<= n p q p<=q)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\open Nat (*)
+\open NatSemiring (*-comm)
+
+\func *-mono-<= (m n p q : Nat) (m<=n : m <= n) (p<=q : p <= q) : m * p <= n * q =>
+  <=-trans (*-mono-left-<= m n p m<=n) (*-mono-right-<= n p q p<=q)
+  \where {
+    \func *-mono-right-<= (n p q : Nat) (p<=q : p <= q) : n * p <= n * q \elim p, q, p<=q
+      | 0, _, _ => z<=n
+      | suc p, suc q, s<=s p<=q => +-mono-left-<= (n * p) (n * q) n (*-mono-right-<= n p q p<=q)
+
+    \func *-mono-left-<= (m n p : Nat) (m<=n : m <= n) : m * p <= n * p =>
+      rewrite (*-comm {m} {p}) $ rewrite (*-comm {n} {p}) $ *-mono-right-<= p m n m<=n
+  }
+
+{-Agda-
+infix 4 _<_
+
+data _<_ : ℕ → ℕ → Set where
+
+  z<s : ∀ {n : ℕ}
+      ------------
+    → zero < suc n
+
+  s<s : ∀ {m n : ℕ}
+    → m < n
+      -------------
+    → suc m < suc n
+-Agda-}
+
+\data \infix 4 < Nat Nat \with
+  | 0, suc n => z<s
+  | suc m, suc n => s<s (m<n : m < n)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func <-trans {m n p : Nat} (m<n : m < n) (n<p : n < p) : m < p
+  | {0}, {suc n}, {suc p}, _, _ => z<s
+  | {suc m}, {suc n}, {suc p}, s<s m<n, s<s n<p => s<s (<-trans m<n n<p)
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\data Trichotomy (m n : Nat)
+  | less (m < n)
+  | eq (m = n)
+  | greater (n < m)
+
+\func <-trichotomy (m n : Nat) : Trichotomy m n
+  | 0, 0 => eq idp
+  | 0, suc n => less z<s
+  | suc m, 0 => greater z<s
+  | suc m, suc n => \case <-trichotomy m n \with {
+    | less m<n => less (s<s m<n)
+    | eq m=n => eq $ pmap suc m=n
+    | greater m>n => greater (s<s m>n)
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func +-mono-< (m n p q : Nat) (m<n : m < n) (p<q : p < q) : m + p < n + q =>
+  <-trans (+-mono-left-< m n p m<n) (+-mono-right-< n p q p<q)
+  \where {
+    \func +-mono-right-< (n p q : Nat) (p<q : p < q) : n + p < n + q \elim n
+      | 0 => p<q
+      | suc n => s<s (+-mono-right-< n p q p<q)
+
+    \func +-mono-left-< (m n p : Nat) (m<n : m < n) : m + p < n + p =>
+      rewrite (+-comm {m} {p}) $ rewrite (+-comm {n} {p}) $ +-mono-right-< p m n m<n
+  }
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func <=-implies-< {m n : Nat} (sm<=n : suc m <= n) : m < n
+  | {0}, {suc n}, _ => z<s
+  | {suc m}, {suc n}, s<=s sm<=n => s<s $ <=-implies-< sm<=n
+
+\func <-implies-<= {m n : Nat} (m<n : m < n) : suc m <= n
+  | {0}, {suc n}, z<s => s<=s z<=n
+  | {suc m}, {suc n}, s<s m<n => s<=s $ <-implies-<= m<n
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func <-trans-revisited {m n p : Nat} (m<n : m < n) (n<p : n < p) : m < p =>
+  \let
+    | ssm<=n => s<=s $ <-implies-<= m<n
+    | sn<=p => <-implies-<= n<p
+    | ssm<=p => <=-trans ssm<=n sn<=p
+    | sm<p => <=-implies-< ssm<=p
+  \in <-decr-left sm<p
+  \where {
+    \func <-decr-left {m n : Nat} (sm<n : suc m < n) : m < n
+      | {0}, {suc n}, _ => z<s
+      | {suc m}, {suc n}, s<s sm<n => s<s $ <-decr-left sm<n
+  }
+
+{-Agda-
+data even : ℕ → Set
+data odd  : ℕ → Set
+
+data even where
+
+  zero :
+      ---------
+      even zero
+
+  suc  : ∀ {n : ℕ}
+    → odd n
+      ------------
+    → even (suc n)
+
+data odd where
+
+  suc  : ∀ {n : ℕ}
+    → even n
+      -----------
+    → odd (suc n)
+-Agda-}
+
+-- (!) Arend does not support overloaded constructors. If we used `suc` instead of `suc-odd` and `suc-even`,
+-- we would need to refer to them as `even.suc` and `even.odd`.
+
+\data even Nat : \Type \with
+  | 0 => zero-even
+  | suc n => suc-even (odd n)
+
+\data odd Nat : \Type \with
+  | suc n => suc-odd (even n)
+
+{-Agda-
+e+e≡e : ∀ {m n : ℕ}
+  → even m
+  → even n
+    ------------
+  → even (m + n)
+
+o+e≡o : ∀ {m n : ℕ}
+  → odd m
+  → even n
+    -----------
+  → odd (m + n)
+
+e+e≡e zero     en  =  en
+e+e≡e (suc om) en  =  suc (o+e≡o om en)
+
+o+e≡o (suc em) en  =  suc (e+e≡e em en)
+-Agda-}
+
+\func e+e=e {m n : Nat} (em : even m) (en : even n) : even (m + n) \elim m, em
+  | 0, zero-even => en
+  | suc m, suc-even om => suc-even $ o+e=o om en
+
+\func o+e=o {m n : Nat} (om : odd m) (en : even n) : odd (m + n) \elim m, om
+  | suc m, suc-odd em => suc-odd $ e+e=e em en
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\func o+o=e {m n : Nat} (om : odd m) (on : odd n) : even (m + n)
+  | {suc m}, {suc n}, suc-odd em, suc-odd en => suc-even $ suc-odd $ e+e=e em en
+
+{-Agda-
+-- Your code goes here
+-Agda-}
+
+\import util.Arith.Bin
+\open Bin
+\import Function (o)
+\import Paths (inv)
+
+\data Can Bin \with
+  | O <> => zero-can
+  | b => one-can (One b)
+
+\data One Bin \with
+  | I <> => one
+  | O b => O-one (One b)
+  | I b => I-one (One b)
+
+\func inc-Can {b : Bin} (cn : Can b) : Can (inc b)
+  | {O <>}, zero-can => one-can one
+  | one-can ob => one-can $ inc-One ob
+
+\func inc-One {b : Bin} (ob : One b) : One $ inc b
+  | {I <>}, one => O-one one
+  | {O b}, O-one ob => I-one ob
+  | {I b}, I-one ob => O-one $ inc-One ob
+
+\func to-Can {n : Nat} : Can (to n)
+  | {0} => zero-can
+  | {suc n} => inc-Can to-Can
+
+\func to-from-id-Can {b : Bin} (cb : Can b) : to (from b) = b
+  | {O <>}, zero-can => idp
+  | one-can ob => to-from-id-One ob
+
+\func to-from-id-One {b : Bin} (ob : One b) : to (from b) = b
+  | {I <>}, one => idp
+  | {O b}, O-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
+    | suc n, s<=s _, from-b=suc-n =>
+      rewrite from-b=suc-n $
+      rewrite (inv $ to-from-id-One ob) $
+      rewrite from-b=suc-n $
+      lemma0
+  }
+  | {I b}, I-one ob => \case from b \as from-b, [1<=from-b] ob : 1 <= from-b, idp : from b = from-b \with {
+    | suc n, s<=s _, from-b=suc-n =>
+      rewrite from-b=suc-n $
+      rewrite (inv $ to-from-id-One ob) $
+      rewrite from-b=suc-n $
+      lemma1
+  }
+
+  \where {
+    \func [1<=from-b] {b : Bin} (ob : One b) : 1 <= from b
+      | {I <>}, one => s<=s z<=n
+      | {O b}, O-one ob => *-mono-<= 1 2 _ _ (s<=s z<=n) ([1<=from-b] ob)
+      | {I b}, I-one ob => +-mono-<= 0 1 _ _ z<=n (*-mono-<= 1 2 _ _ (s<=s z<=n) ([1<=from-b] ob))
+
+    \func lemma0 {n : Nat} : inc (inc (to (2 * n))) = O (inc (to n))
+      | {0} => idp
+      | {suc n} => pmap (inc o inc) lemma0
+
+    \func lemma1 {n : Nat} : inc (inc (inc (to (2 * n)))) = I (inc (to n))
+      | {0} => idp
+      | {suc n} => pmap (inc o inc) lemma1
+  }
+
+{-Agda-
+import Data.Nat using (_≤_; z≤n; s≤s)
+import Data.Nat.Properties using (≤-refl; ≤-trans; ≤-antisym; ≤-total;
+                                  +-monoʳ-≤; +-monoˡ-≤; +-mono-≤)
+-Agda-}
+
+\import Order.PartialOrder (<=, <=-reflexive, <=-transitive, <=-antisymmetric)
+\import Order.LinearOrder (TotalOrder)
+\open TotalOrder (totality)
+\import Algebra.Ordered (LinearlyOrderedSemiring)
+\open LinearlyOrderedSemiring (<=_+)
+\import Arith.Nat (zero<=_, suc<=suc, NatSemiring)

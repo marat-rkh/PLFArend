@@ -1,0 +1,2 @@
+\func extensionality {A B : \Type} {f g : A -> B} (eq : \Pi (x : A) -> f x = g x) : f = g =>
+  path (\lam i => \lam x => (eq x) @ i)
