@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Replace Agda With Arend" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="Replace_agda_with_arendKt" />
+    <module name="scripts" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>
