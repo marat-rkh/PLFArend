@@ -500,7 +500,7 @@ regard to inequality.  Rewrite all of `+-monoˡ-≤`, `+-monoʳ-≤`, and `+-mon
 
 ```tex
 \import Order.PartialOrder (Preorder)
-\open Preorder (<=, <=-reflexive, <=-transitive)
+\open Preorder (<=, <=-refl, <=-transitive)
 
 \module <=-Reasoning \where {
   \func \infixr 2 <=[] {A : Preorder} (x : A) {y : A} (x<=y : x <= y) : x <= y => x<=y
@@ -509,7 +509,7 @@ regard to inequality.  Rewrite all of `+-monoˡ-≤`, `+-monoʳ-≤`, and `+-mon
 
   \func \infixr 2 ]<= {A : Preorder} {x y z : A} (x<=y : x <= y) (y<=z : y <= z) : x <= z => <=-transitive x<=y y<=z
 
-  \func \fix 3 <=qed {A : Preorder} (x : A) : x <= x => <=-reflexive
+  \func \fix 3 <=qed {A : Preorder} (x : A) : x <= x => <=-refl
 }
 
 \import Order.PartialOrder (<=)

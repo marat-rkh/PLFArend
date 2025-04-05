@@ -671,12 +671,12 @@ Show that `y ≤ z` holds if and only if there exists a `x` such that
         \in TruncP.map p (\lam p' => (p'.1, pmap suc p'.2))
 
     \func [<=] {y z : Nat} (p :  ∃ {x} (x + y = z)) : TruncP (y <= z)
-      | {y}, {z}, inP (0, y=z) => inP (rewrite y=z NatSemiring.<=-reflexive)
+      | {y}, {z}, inP (0, y=z) => inP (rewrite y=z NatSemiring.<=-refl)
       | {y}, {0}, inP (suc x, ())
       | {y}, {suc z}, inP (suc x, suc[x+y]=suc[z]) =>
         \let
           | p : TruncP (y <= z) => [<=] (inP (x, pmap pred suc[x+y]=suc[z]))
-          | q : z <= suc z => NatSemiring.<=_+ (NatSemiring.<=-reflexive {z}) (zero<=_ {1})
+          | q : z <= suc z => NatSemiring.<=_+ (NatSemiring.<=-refl {z}) (zero<=_ {1})
         \in TruncP.map p (NatSemiring.<=-transitive __ q)
   }
 ```

@@ -1258,11 +1258,11 @@ import Data.Nat.Properties using (≤-refl; ≤-trans; ≤-antisym; ≤-total;
 </details>
 
 ```tex
-\import Order.PartialOrder (<=, <=-reflexive, <=-transitive, <=-antisymmetric)
+\import Order.PartialOrder (<=, <=-refl, <=-transitive, <=-antisymmetric)
 \import Order.LinearOrder (TotalOrder)
 \open TotalOrder (totality)
-\import Algebra.Ordered (LinearlyOrderedSemiring)
-\open LinearlyOrderedSemiring (<=_+)
+\import Algebra.Ordered (LinearlyOrderedAbMonoid)
+\open LinearlyOrderedAbMonoid (<=_+)
 \import Arith.Nat (zero<=_, suc<=suc, NatSemiring)
 ```
 In the standard library, `≤-total` is formalised in terms of
