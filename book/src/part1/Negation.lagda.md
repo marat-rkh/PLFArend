@@ -278,10 +278,10 @@ assimilation ¬x ¬x′ = extensionality (λ x → ⊥-elim (¬x x))
 \func assimilation {A : \Type} (not-x not-x' : Not A) : not-x = not-x' =>
   extensionality (\lam x => absurd (not-x x))
 
--- In Arend, we use `\Prop` to encode logic. Types in `\Prop` have at most one element by definition.
--- Builtin function `Path.inProp` states exactly that:
+-- In Arend, we use `\Prop` to encode logic. Types in `\Prop` have at most one element.
+-- Standard library lemma `Logic.prop-pi` proves exactly that.
 
-\func assimilation' {A : \Type} (not-x not-x' : Not A) : not-x = not-x' => Path.inProp not-x not-x'
+\func assimilation' {A : \Type} (not-x not-x' : Not A) : not-x = not-x' => Logic.prop-pi
 ```
 Evidence for `¬ A` implies that any evidence of `A`
 immediately leads to a contradiction.  But extensionality

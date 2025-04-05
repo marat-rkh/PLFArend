@@ -602,7 +602,7 @@ Here is the proof in the reverse direction:
 \func Exists-odd {n : Nat} (e : ∃ {m} (suc (m * 2) = n)) : odd n \elim n
   | 0 =>
     \let empty => TruncP.map e (\case __.2 \with {})
-    \in absurd (TruncP.remove Path.inProp empty)
+    \in absurd (TruncP.remove Logic.prop-isProp empty)
   | suc n =>
     \let e' : ∃ {m} (m * 2 = n) => TruncP.map e (\lam p => (p.1, pmap pred p.2))
     \in suc-odd (Exists-even e')
