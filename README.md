@@ -16,4 +16,4 @@ Part 3: 0/5 sections completed.
 ## Attribution
 
 This project is based on the ["Programming Language Foundations in Agda"](https://plfa.github.io/) by Philip Wadler, Wen Kokke and Jeremy G. Siek, licensed under CC-BY-4.0.
-I copy each page of the book and add Arend code snippet alongside the original Agda snippet. I also add solutions to exercises in Arend.
+I copy each page of the book and add Arend code snippets alongside the original Agda ones. I also include solutions to the exercises in Arend.
