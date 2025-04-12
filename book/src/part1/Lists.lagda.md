@@ -1,12 +1,9 @@
 ---
 title     : "Lists: Lists and higher-order functions"
-layout    : page
-prev      : /Decidable/
 permalink : /Lists/
-next      : /Lambda/
 ---
 
-```
+```agda
 module plfa.part1.Lists where
 ```
 
@@ -712,7 +709,7 @@ _ =
 ```
 Now the time to reverse a list is linear in the length of the list.
 
-## Map {name=Map}
+## Map {#Map}
 
 Map applies a function to every element of a list to generate a corresponding list.
 Map is an example of a _higher-order function_, one which takes a function as an
@@ -799,11 +796,11 @@ _ =
   1 :: 2 :: 3 :: [] `qed
 ```
 
-Any type that is parameterised on another type, such as lists, has a
+A type that is parameterised on another type, such as list, often has a
 corresponding map, which accepts a function and returns a function
 from the type parameterised on the domain of the function to the type
 parameterised on the range of the function. Further, a type that is
-parameterised on _n_ types will have a map that is parameterised on
+parameterised on _n_ types often has a map that is parameterised on
 _n_ functions.
 
 
@@ -893,7 +890,7 @@ Define a suitable map operator over trees:
   | node tr1 b tr2 => node (map-Tree f g tr1) (g b) (map-Tree f g tr2)
 ```
 
-## Fold {name=Fold}
+## Fold {#Fold}
 
 Fold takes an operator and a value, and uses the operator to combine
 each of the elements of the list, taking the given value as the result
@@ -1317,13 +1314,14 @@ foldr-monoid _⊗_ e ⊗-monoid (x ∷ xs) y =
 ```
 
 In a previous exercise we showed the following.
-```
+```agda
 postulate
   foldr-++ : ∀ {A : Set} (_⊗_ : A → A → A) (e : A) (xs ys : List A) →
     foldr _⊗_ e (xs ++ ys) ≡ foldr _⊗_ (foldr _⊗_ e ys) xs
 ```
 
-As a consequence, using a previous exercise, we have the following:
+As a consequence we can decompose fold over append in a monoid
+into two folds as follows.
 <details><summary>Agda</summary>
 
 ```agda
@@ -1410,7 +1408,7 @@ Show that if `_⊗_` and `e` form a monoid, then `foldr _⊗_ e` and
 ```
 
 
-## All {name=All}
+## All {#All}
 
 We can also define predicates over lists. Two of the most important
 are `All` and `Any`.
@@ -1711,7 +1709,7 @@ You will need to use extensionality.
 
 #### Exercise `All-∀` (practice)
 
-Show that `All P xs` is isomorphic to `∀ {x} → x ∈ xs → P x`.
+Show that `All P xs` is isomorphic to `∀ x → x ∈ xs → P x`.
 
 <details><summary>Agda</summary>
 
