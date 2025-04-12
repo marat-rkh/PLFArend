@@ -1,12 +1,9 @@
 ---
 title     : "Quantifiers: Universals and existentials"
-layout    : page
-prev      : /Negation/
 permalink : /Quantifiers/
-next      : /Decidable/
 ---
 
-```
+```agda
 module plfa.part1.Quantifiers where
 ```
 
@@ -148,7 +145,7 @@ Show that a disjunction of universals implies a universal of disjunctions:
 ```agda
 postulate
   ⊎∀-implies-∀⊎ : ∀ {A : Set} {B C : A → Set} →
-    (∀ (x : A) → B x) ⊎ (∀ (x : A) → C x)  →  ∀ (x : A) → B x ⊎ C x
+    (∀ (x : A) → B x) ⊎ (∀ (x : A) → C x) → ∀ (x : A) → B x ⊎ C x
 ```
 </details>
 
@@ -555,19 +552,19 @@ number `m` and evidence that `m * 2 ≡ n` or `1 + m * 2 ≡ n`.
 We induct over the evidence that `n` is even or odd:
 
 * If the number is even because it is zero, then we return a pair
-consisting of zero and the evidence that twice zero is zero.
+  consisting of zero and the evidence that twice zero is zero.
 
 * If the number is even because it is one more than an odd number,
-then we apply the induction hypothesis to give a number `m` and
-evidence that `1 + m * 2 ≡ n`. We return a pair consisting of `suc m`
-and evidence that `suc m * 2 ≡ suc n`, which is immediate after
-substituting for `n`.
+  then we apply the induction hypothesis to give a number `m` and
+  evidence that `1 + m * 2 ≡ n`. We return a pair consisting of `suc m`
+  and evidence that `suc m * 2 ≡ suc n`, which is immediate after
+  substituting for `n`.
 
 * If the number is odd because it is the successor of an even number,
-then we apply the induction hypothesis to give a number `m` and
-evidence that `m * 2 ≡ n`. We return a pair consisting of `suc m` and
-evidence that `1 + m * 2 ≡ suc n`, which is immediate after
-substituting for `n`.
+  then we apply the induction hypothesis to give a number `m` and
+  evidence that `m * 2 ≡ n`. We return a pair consisting of `suc m` and
+  evidence that `1 + m * 2 ≡ suc n`, which is immediate after
+  substituting for `n`.
 
 This completes the proof in the forward direction.
 
@@ -614,15 +611,15 @@ and in the even case consider the two possibilities for the number
 that is doubled:
 
 - In the even case for `zero`, we must show `zero * 2` is even, which
-follows by `even-zero`.
+  follows by `even-zero`.
 
 - In the even case for `suc n`, we must show `suc m * 2` is even.  The
-inductive hypothesis tells us that `1 + m * 2` is odd, from which the
-desired result follows by `even-suc`.
+  inductive hypothesis tells us that `1 + m * 2` is odd, from which the
+  desired result follows by `even-suc`.
 
 - In the odd case, we must show `1 + m * 2` is odd.  The inductive
-hypothesis tell us that `m * 2` is even, from which the desired result
-follows by `odd-suc`.
+  hypothesis tell us that `m * 2` is even, from which the desired result
+  follows by `odd-suc`.
 
 This completes the proof in the backward direction.
 
@@ -643,7 +640,7 @@ restated in this way.
 -- TODO ∃-even-odd
 ```
 
-#### Exercise `∃-|-≤` (practice)
+#### Exercise `∃-+-≤` (practice)
 
 Show that `y ≤ z` holds if and only if there exists a `x` such that
 `x + y ≡ z`.
@@ -758,7 +755,7 @@ postulate
 Does the converse hold? If so, prove; if not, explain why.
 
 
-#### Exercise `Bin-isomorphism` (stretch) {name=Bin-isomorphism}
+#### Exercise `Bin-isomorphism` (stretch) {#Bin-isomorphism}
 
 Recall that Exercises
 [Bin](/Naturals/#Bin),
@@ -783,21 +780,21 @@ And to establish the following properties:
     to (from b) ≡ b
 
 Using the above, establish that there is an isomorphism between `ℕ` and
-`∃[ b ](Can b)`.
+`∃[ b ] Can b`.
 
 We recommend proving the following lemmas which show that, for a given
 binary number `b`, there is only one proof of `One b` and similarly
 for `Can b`.
 
-    ≡One : ∀{b : Bin} (o o' : One b) → o ≡ o'
+    ≡One : ∀ {b : Bin} (o o′ : One b) → o ≡ o′
 
-    ≡Can : ∀{b : Bin} (cb : Can b) (cb' : Can b) → cb ≡ cb'
+    ≡Can : ∀ {b : Bin} (cb cb′ : Can b) → cb ≡ cb′
 
 Many of the alternatives for proving `to∘from` turn out to be tricky.
 However, the proof can be straightforward if you use the following lemma,
 which is a corollary of `≡Can`.
 
-    proj₁≡→Can≡ : {cb cb′ : ∃[ b ](Can b)} → proj₁ cb ≡ proj₁ cb′ → cb ≡ cb′
+    proj₁≡→Can≡ : {cb cb′ : ∃[ b ] Can b} → proj₁ cb ≡ proj₁ cb′ → cb ≡ cb′
 
 <details><summary>Agda</summary>
 
@@ -842,7 +839,7 @@ which is a corollary of `≡Can`.
 ## Standard library
 
 Definitions similar to those in this chapter can be found in the standard library:
-```
+```agda
 import Data.Product using (Σ; _,_; ∃; Σ-syntax; ∃-syntax)
 ```
 

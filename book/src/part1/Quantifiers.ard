@@ -52,7 +52,7 @@ postulate
 {-Agda-
 postulate
   ⊎∀-implies-∀⊎ : ∀ {A : Set} {B C : A → Set} →
-    (∀ (x : A) → B x) ⊎ (∀ (x : A) → C x)  →  ∀ (x : A) → B x ⊎ C x
+    (∀ (x : A) → B x) ⊎ (∀ (x : A) → C x) → ∀ (x : A) → B x ⊎ C x
 -Agda-}
 
 \func ||-Pi->Pi-|| {A : \Type} {B C : A -> \Prop} (p : (\Pi (a : A) -> B a) || (\Pi (a : A) -> C a)) :
