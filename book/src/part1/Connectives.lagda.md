@@ -1,9 +1,6 @@
 ---
 title     : "Connectives: Conjunction, disjunction, and implication"
-layout    : page
-prev      : /Isomorphism/
 permalink : /Connectives/
-next      : /Negation/
 ---
 
 <details><summary>Agda</summary>
@@ -66,7 +63,7 @@ open plfa.part1.Isomorphism.≃-Reasoning
 
 Given two propositions `A` and `B`, the conjunction `A × B` holds
 if both `A` holds and `B` holds.  We formalise this idea by
-declaring a suitable record type:
+declaring a suitable datatype:
 <details><summary>Agda</summary>
 
 ```agda
@@ -92,8 +89,8 @@ Evidence that `A × B` holds is of the form `⟨ M , N ⟩`, where `M`
 provides evidence that `A` holds and `N` provides evidence that `B`
 holds.
 
-Given evidence that `A × B` holds, we can conclude that either
-`A` holds or `B` holds:
+Given evidence that `A × B` holds, we can conclude that both
+`A` holds and `B` holds:
 <details><summary>Agda</summary>
 
 ```agda
@@ -160,7 +157,7 @@ propositional equality to simplify to the same term.
 
 We set the precedence of conjunction so that it binds less
 tightly than anything save disjunction:
-```
+```agda
 infixr 2 _×_
 ```
 Thus, `m ≤ n × n ≤ p` parses as `(m ≤ n) × (n ≤ p)`.
@@ -414,7 +411,7 @@ is isomorphic to `(A → B) × (B → A)`.
 ## Truth is unit
 
 Truth `⊤` always holds. We formalise this idea by
-declaring a suitable record type:
+declaring a suitable datatype:
 <details><summary>Agda</summary>
 
 ```agda
@@ -699,7 +696,7 @@ simplify to the same term, and similarly for `inj₂ y`.
 
 We set the precedence of disjunction so that it binds less tightly
 than any other declared operator:
-```
+```agda
 infixr 1 _⊎_
 ```
 Thus, `A × C ⊎ B × C` parses as `(A × C) ⊎ (B × C)`.
@@ -932,7 +929,7 @@ Show empty is the right identity of sums up to isomorphism.
   A `=~-qed
 ```
 
-## Implication is function {name=implication}
+## Implication is function {#implication}
 
 Given two propositions `A` and `B`, the implication `A → B` holds if
 whenever `A` holds then `B` must also hold.  We formalise implication using
@@ -1292,7 +1289,7 @@ one of these laws is "more true" than the other.
 #### Exercise `⊎-weak-×` (recommended)
 
 Show that the following property holds:
-```
+```agda
 postulate
   ⊎-weak-× : ∀ {A B C : Set} → (A ⊎ B) × C → A ⊎ (B × C)
 ```
@@ -1319,7 +1316,7 @@ distributive law, and explain how it relates to the weak version.
 #### Exercise `⊎×-implies-×⊎` (practice)
 
 Show that a disjunct of conjuncts implies a conjunct of disjuncts:
-```
+```agda
 postulate
   ⊎×-implies-×⊎ : ∀ {A B C D : Set} → (A × B) ⊎ (C × D) → (A ⊎ C) × (B ⊎ D)
 ```
