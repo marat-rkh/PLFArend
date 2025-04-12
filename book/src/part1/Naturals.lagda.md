@@ -1,12 +1,10 @@
 ---
 title     : "Naturals: Natural numbers"
-layout    : page
-prev      : /GettingStarted/
 permalink : /Naturals/
-next      : /Induction/
 ---
 
-```
+```agda
+{-# OPTIONS --exact-split #-}
 module plfa.part1.Naturals where
 ```
 
@@ -85,7 +83,7 @@ after zero; and `2` is shorthand for `suc (suc zero)`, which is the
 same as `suc 1`, the successor of one; and `3` is shorthand for the
 successor of two; and so on.
 
-#### Exercise `seven` (practice) {name=seven}
+#### Exercise `seven` (practice) {#seven}
 
 Write out `7` in longhand.
 
@@ -100,6 +98,9 @@ Write out `7` in longhand.
 \func seven : Nat' => suc' (suc' (suc' (suc' (suc' (suc' (suc' zero'))))))
 ```
 
+You will need to give both a type signature and definition for the
+variable `seven`. Type `C-c C-l` in Emacs to instruct Agda to re-load.
+
 
 ## Unpacking the inference rules
 
@@ -110,7 +111,7 @@ _conclusion_.  The first rule is the base case. It has no hypotheses,
 and the conclusion asserts that `zero` is a natural.  The second rule
 is the inductive case. It has one hypothesis, which assumes that `m`
 is a natural, and the conclusion asserts that `suc m`
-is a also a natural.
+is also a natural.
 
 
 ## Unpacking the Agda definition
@@ -133,7 +134,7 @@ corresponding `data` declaration.  The lines
 
 give _signatures_ specifying the types of the constructors `zero` and `suc`.
 They tell us that `zero` is a natural number and that `suc` takes a natural
-number as argument and returns a natural number.
+number as an argument and returns a natural number.
 
 You may have noticed that `ℕ` and `→` don't appear on your keyboard.
 They are symbols in _unicode_.  At the end of each chapter is a list
@@ -318,7 +319,7 @@ Parentheses and semicolons are among the few characters that cannot
 appear in names, so we do not need extra spaces in the `using` list.
 
 
-## Operations on naturals are recursive functions {name=plus}
+## Operations on naturals are recursive functions {#plus}
 
 Now that we have the natural numbers, what can we do with them?
 For instance, can we define arithmetic operations such as
@@ -497,7 +498,7 @@ is not like testimony in a court which must be weighed to determine
 whether the witness is trustworthy.  Rather, it is ironclad.  The
 other word for evidence, which we will use interchangeably, is _proof_.
 
-#### Exercise `+-example` (practice) {name=plus-example}
+#### Exercise `+-example` (practice) {#plus-example}
 
 Compute `3 + 4`, writing out your reasoning as a chain of equations, using the equations for `+`.
 
@@ -586,13 +587,13 @@ _ =
   6 `qed
 ```
 The first line matches the inductive case by taking `m = 1` and `n = 3`,
-The second line matches the inductive case by taking `m = 0` and `n = 3`,
+the second line matches the inductive case by taking `m = 0` and `n = 3`,
 and the third line matches the base case by taking `n = 3`.
 Here we have omitted the signature declaring `_ : 2 * 3 ≡ 6`, since
 it can easily be inferred from the corresponding term.
 
 
-#### Exercise `*-example` (practice) {name=times-example}
+#### Exercise `*-example` (practice) {#times-example}
 
 Compute `3 * 4`, writing out your reasoning as a chain of equations, using the equations for `*`.
 (You do not need to step through the evaluation of `+`.)
@@ -615,7 +616,7 @@ Compute `3 * 4`, writing out your reasoning as a chain of equations, using the e
 ```
 
 
-#### Exercise `_^_` (recommended) {name=power}
+#### Exercise `_^_` (recommended) {#power}
 
 Define exponentiation, which is given by the following equations:
 
@@ -675,15 +676,30 @@ suc m ∸ suc n  =  m ∸ n
 ```
 We can do a simple analysis to show that all the cases are covered.
 
-  * Consider the second argument.
+* Consider the second argument.
     + If it is `zero`, then the first equation applies.
     + If it is `suc n`, then consider the first argument.
-      - If it is `zero`, then the second equation applies.
-      - If it is `suc m`, then the third equation applies.
+        - If it is `zero`, then the second equation applies.
+        - If it is `suc m`, then the third equation applies.
 
-Again, the recursive definition is well founded because
-monus on bigger numbers is defined in terms of monus on
-smaller numbers.
+Agda will raise an error if all the cases are not covered.
+
+Enumerating the cases as above ensures that exactly one equation
+will apply.  Say the second line was instead written
+
+    zero  ∸ n  =  zero
+
+Then it would not be clear whether Agda should use the first
+or second line to simplify `zero ∸ zero`.  In this case, both
+lines lead to the same answer, `zero`, but that may not be
+the case in general.  The `--exact-split` flag, set at the beginning of this chapter,
+causes Agda to raise an error if cases overlap.  We will normally set the flag,
+but it will be omitted in Chapter [Decidable](/Decidable/) to permit
+an interesting example in Section [Logical Connectives](/Decidable/#logical-connectives).
+
+As with addition and multiplication, the recursive definition is well
+founded because monus on bigger numbers is defined in terms of monus
+on smaller numbers.
 
 For example, let's subtract two from three:
 <details><summary>Agda</summary>
@@ -735,7 +751,9 @@ _ =
   0 `qed
 ```
 
-#### Exercise `∸-example₁` and `∸-example₂` (recommended) {name=monus-examples}
+
+
+#### Exercise `∸-example₁` and `∸-example₂` (recommended) {#monus-examples}
 
 Compute `5 ∸ 3` and `3 ∸ 5`, writing out your reasoning as a chain of equations.
 
@@ -896,7 +914,7 @@ definitions is quite similar.  They might be considered two sides of
 the same coin.
 
 
-## The story of creation, finitely {name=finite-creation}
+## The story of creation, finitely {#finite-creation}
 
 The above story was told in a stratified way.  First, we create
 the infinite set of naturals.  We take that set as given when
@@ -994,7 +1012,7 @@ required type of each:
     ?0 : ℕ
     ?1 : ℕ
 
-Going into hole 0 and type `C-c C-,` will display information on the
+Going into hole 0 and typing `C-c C-,` will display information on the
 required type of the hole, and what free variables are available:
 
     Goal: ℕ
@@ -1008,7 +1026,7 @@ filled, you can type `C-c C-space`, which will remove the hole:
     zero + n = n
     suc m + n = { }1
 
-Again, going into hole 1 and type `C-c C-,` will display information on the
+Again, going into hole 1 and typing `C-c C-,` will display information on the
 required type of the hole, and what free variables are available:
 
     Goal: ℕ
@@ -1074,7 +1092,7 @@ Haskell requires time proportional to the sum of the logarithms of
 _m_ and _n_.
 
 
-#### Exercise `Bin` (stretch) {name=Bin}
+#### Exercise `Bin` (stretch) {#Bin}
 
 A more efficient representation of natural numbers uses a binary
 rather than a unary system.  We represent a number as a bitstring:
