@@ -1,12 +1,9 @@
 ---
 title     : "Decidable: Booleans and decision procedures"
-layout    : page
-prev      : /Quantifiers/
 permalink : /Decidable/
-next      : /Lists/
 ---
 
-```
+```agda
 module plfa.part1.Decidable where
 ```
 
@@ -449,7 +446,7 @@ trouble normalising evidence of negation.)
 #### Exercise `_<?_` (recommended)
 
 Analogous to the function above, define a function to decide strict inequality:
-```
+```agda
 postulate
   _<?_ : ∀ (m n : ℕ) → Dec (m < n)
 ```
@@ -480,7 +477,7 @@ postulate
 #### Exercise `_≡ℕ?_` (practice)
 
 Define a function to decide whether two naturals are equal:
-```
+```agda
 postulate
   _≡ℕ?_ : ∀ (m n : ℕ) → Dec (m ≡ n)
 ```
@@ -892,18 +889,18 @@ postulate
 Give analogues of the `_⇔_` operation from
 Chapter [Isomorphism](/Isomorphism/#iff),
 operation on booleans and decidables, and also show the corresponding erasure:
-```
+```agda
 postulate
   _iff_ : Bool → Bool → Bool
   _⇔-dec_ : ∀ {A B : Set} → Dec A → Dec B → Dec (A ⇔ B)
   iff-⇔ : ∀ {A B : Set} (x : Dec A) (y : Dec B) → ⌊ x ⌋ iff ⌊ y ⌋ ≡ ⌊ x ⇔-dec y ⌋
 ```
 
-```
+```agda
 -- Your code goes here
 ```
 
-## Proof by reflection {name=proof-by-reflection}
+## Proof by reflection {#proof-by-reflection}
 
 Let's revisit our definition of monus from
 Chapter [Naturals](/Naturals/).
