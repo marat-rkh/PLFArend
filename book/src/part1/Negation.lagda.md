@@ -1,12 +1,9 @@
 ---
 title     : "Negation: Negation, with intuitionistic and classical logic"
-layout    : page
-prev      : /Connectives/
 permalink : /Negation/
-next      : /Quantifiers/
 ---
 
-```
+```agda
 module plfa.part1.Negation where
 ```
 
@@ -85,7 +82,7 @@ means that `¬x` must be a function of type `A → ⊥`, and hence the applicati
 
 We set the precedence of negation so that it binds more tightly
 than disjunction and conjunction, but less tightly than anything else:
-```
+```agda
 infix 3 ¬_
 ```
 Thus, `¬ A × ¬ B` parses as `(¬ A) × (¬ B)` and `¬ m ≡ n` as `¬ (m ≡ n)`.
@@ -458,7 +455,7 @@ _Communications of the ACM_, December 2015.)
 ## Excluded middle is irrefutable
 
 The law of the excluded middle can be formulated as follows:
-```
+```agda
 postulate
   em : ∀ {A : Set} → A ⊎ ¬ A
 ```
@@ -633,7 +630,7 @@ Show that each of these implies all the others.
 #### Exercise `Stable` (stretch)
 
 Say that a formula is _stable_ if double negation elimination holds for it:
-```
+```agda
 Stable : Set → Set
 Stable A = ¬ ¬ A → A
 ```
