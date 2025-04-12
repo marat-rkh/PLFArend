@@ -1,12 +1,9 @@
 ---
 title     : "Isomorphism: Isomorphism and Embedding"
-layout    : page
-prev      : /Equality/
 permalink : /Isomorphism/
-next      : /Connectives/
 ---
 
-```
+```agda
 module plfa.part1.Isomorphism where
 ```
 
@@ -99,13 +96,13 @@ _∘_ : ∀ {A B C : Set} → (B → C) → (A → B) → (A → C)
 Thus, `g ∘ f` is the function that first applies `f` and
 then applies `g`.  An equivalent definition, exploiting lambda
 expressions, is as follows:
-```
+```agda
 _∘′_ : ∀ {A B C : Set} → (B → C) → (A → B) → (A → C)
 g ∘′ f  =  λ x → g (f x)
 ```
 
 
-## Extensionality {name=extensionality}
+## Extensionality {#extensionality}
 
 Extensionality asserts that the only way to distinguish functions is
 by applying them; if two functions applied to the same argument always
@@ -253,10 +250,11 @@ open _≃_
 ```
 Let's unpack the definition. An isomorphism between sets `A` and `B` consists
 of four things:
-+ A function `to` from `A` to `B`,
-+ A function `from` from `B` back to `A`,
-+ Evidence `from∘to` asserting that `from` is a *left-inverse* for `to`,
-+ Evidence `to∘from` asserting that `from` is a *right-inverse* for `to`.
+
+1. A function `to` from `A` to `B`,
+2. A function `from` from `B` back to `A`,
+3. Evidence `from∘to` asserting that `from` is a *left-inverse* for `to`,
+4. Evidence `to∘from` asserting that `from` is a *right-inverse* for `to`.
 
 In particular, the third asserts that `from ∘ to` is the identity, and
 the fourth that `to ∘ from` is the identity, hence the names.
@@ -667,7 +665,7 @@ open ≲-Reasoning
 #### Exercise `≃-implies-≲` (practice)
 
 Show that every isomorphism implies an embedding.
-```
+```agda
 postulate
   ≃-implies-≲ : ∀ {A B : Set}
     → A ≃ B
@@ -689,7 +687,7 @@ postulate
   | from-to => A=~B.from-to
 ```
 
-#### Exercise `_⇔_` (practice) {name=iff}
+#### Exercise `_⇔_` (practice) {#iff}
 
 Define equivalence of propositions (also known as "if and only if") as follows:
 <details><summary>Agda</summary>
@@ -730,7 +728,7 @@ Show that equivalence is reflexive, symmetric, and transitive.
   | from => A<=>B.from o B<=>C.from
 ```
 
-#### Exercise `Bin-embedding` (stretch) {name=Bin-embedding}
+#### Exercise `Bin-embedding` (stretch) {#Bin-embedding}
 
 Recall that Exercises
 [Bin](/Naturals/#Bin) and
