@@ -1,12 +1,9 @@
 ---
 title     : "Relations: Inductive definition of relations"
-layout    : page
-prev      : /Induction/
 permalink : /Relations/
-next      : /Equality/
 ---
 
-```
+```agda
 module plfa.part1.Relations where
 ```
 
@@ -297,11 +294,11 @@ on names for some of the most common properties.
 
 * _Reflexive_. For all `n`, the relation `n ≤ n` holds.
 * _Transitive_. For all `m`, `n`, and `p`, if `m ≤ n` and
-`n ≤ p` hold, then `m ≤ p` holds.
+  `n ≤ p` hold, then `m ≤ p` holds.
 * _Anti-symmetric_. For all `m` and `n`, if both `m ≤ n` and
-`n ≤ m` hold, then `m ≡ n` holds.
+  `n ≤ m` hold, then `m ≡ n` holds.
 * _Total_. For all `m` and `n`, either `m ≤ n` or `n ≤ m`
-holds.
+  holds.
 
 The relation `_≤_` satisfies all four of these properties.
 
@@ -324,7 +321,7 @@ lack---for instance by saying that a newly introduced relation is a
 partial order but not a total order.
 
 
-#### Exercise `orderings` (practice) {name=orderings}
+#### Exercise `orderings` (practice) {#orderings}
 
 Give an example of a preorder that is not a partial order.
 
@@ -495,7 +492,7 @@ and `suc n ≤ suc m` and must show `suc m ≡ suc n`.  The inductive
 hypothesis `≤-antisym m≤n n≤m` establishes that `m ≡ n`, and our goal
 follows by congruence.
 
-#### Exercise `≤-antisym-cases` (practice) {name=leq-antisym-cases}
+#### Exercise `≤-antisym-cases` (practice) {#leq-antisym-cases}
 
 The above proof omits cases where one argument is `z≤n` and one
 argument is `s≤s`.  Why is it ok to omit them?
@@ -675,8 +672,8 @@ variant that returns the flipped case:
 ≤-total″ m       zero                      =  flipped z≤n
 ≤-total″ zero    (suc n)                   =  forward z≤n
 ≤-total″ (suc m) (suc n) with ≤-total″ m n
-...                        | forward m≤n   =  forward (s≤s m≤n)
-...                        | flipped n≤m   =  flipped (s≤s n≤m)
+...                         | forward m≤n  =  forward (s≤s m≤n)
+...                         | flipped n≤m  =  flipped (s≤s n≤m)
 ```
 </details>
 
@@ -806,7 +803,7 @@ Show that multiplication is monotonic with regard to inequality.
 ```
 
 
-## Strict inequality {name=strict-inequality}
+## Strict inequality {#strict-inequality}
 
 We can define strict inequality similarly to inequality:
 <details><summary>Agda</summary>
@@ -853,9 +850,10 @@ and conversely.  One can then give an alternative derivation of the
 properties of strict inequality, such as transitivity, by
 exploiting the corresponding properties of inequality.
 
-#### Exercise `<-trans` (recommended) {name=less-trans}
+#### Exercise `<-trans` (recommended) {#less-trans}
 
-Show that strict inequality is transitive.
+Show that strict inequality is transitive. Use a direct proof. (A later
+exercise exploits the relation between < and ≤.)
 
 <details><summary>Agda</summary>
 
@@ -870,13 +868,13 @@ Show that strict inequality is transitive.
   | {suc m}, {suc n}, {suc p}, s<s m<n, s<s n<p => s<s (<-trans m<n n<p)
 ```
 
-#### Exercise `trichotomy` (practice) {name=trichotomy}
+#### Exercise `trichotomy` (practice) {#trichotomy}
 
 Show that strict inequality satisfies a weak version of trichotomy, in
 the sense that for any `m` and `n` that one of the following holds:
-  * `m < n`,
-  * `m ≡ n`, or
-  * `m > n`.
+* `m < n`,
+* `m ≡ n`, or
+* `m > n`.
 
 Define `m > n` to be the same as `n < m`.
 You will need a suitable data declaration,
@@ -908,7 +906,7 @@ similar to that used for totality.
   }
 ```
 
-#### Exercise `+-mono-<` (practice) {name=plus-mono-less}
+#### Exercise `+-mono-<` (practice) {#plus-mono-less}
 
 Show that addition is monotonic with respect to strict inequality.
 As with inequality, some additional definitions may be required.
@@ -933,7 +931,7 @@ As with inequality, some additional definitions may be required.
   }
 ```
 
-#### Exercise `≤-iff-<` (recommended) {name=leq-iff-less}
+#### Exercise `≤-iff-<` (recommended) {#leq-iff-less}
 
 Show that `suc m ≤ n` implies `m < n`, and conversely.
 
@@ -954,7 +952,7 @@ Show that `suc m ≤ n` implies `m < n`, and conversely.
   | {suc m}, {suc n}, s<s m<n => s<=s $ <-implies-<= m<n
 ```
 
-#### Exercise `<-trans-revisited` (practice) {name=less-trans-revisited}
+#### Exercise `<-trans-revisited` (practice) {#less-trans-revisited}
 
 Give an alternative proof that strict inequality is transitive,
 using the relation between strict inequality and inequality and
@@ -1108,7 +1106,7 @@ evidence that the first number is odd. If it is because it is the
 successor of an even number, then the result is odd because it is the
 successor of the sum of two even numbers, which is even.
 
-#### Exercise `o+o≡e` (stretch) {name=odd-plus-odd}
+#### Exercise `o+o≡e` (stretch) {#odd-plus-odd}
 
 Show that the sum of two odd numbers is even.
 
@@ -1124,7 +1122,7 @@ Show that the sum of two odd numbers is even.
   | {suc m}, {suc n}, suc-odd em, suc-odd en => suc-even $ suc-odd $ e+e=e em en
 ```
 
-#### Exercise `Bin-predicates` (stretch) {name=Bin-predicates}
+#### Exercise `Bin-predicates` (stretch) {#Bin-predicates}
 
 Recall that
 Exercise [Bin](/Naturals/#Bin)
