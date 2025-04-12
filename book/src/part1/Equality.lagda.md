@@ -1,12 +1,9 @@
 ---
 title     : "Equality: Equality and equational reasoning"
-layout    : page
-prev      : /Relations/
 permalink : /Equality/
-next      : /Isomorphism/
 ---
 
-```
+```agda
 module plfa.part1.Equality where
 ```
 
@@ -49,7 +46,7 @@ can be a parameter because it doesn't vary, while the second must be
 an index, so it can be required to be equal to the first.
 
 We declare the precedence of equality as follows:
-```
+```agda
 infix 4 _≡_
 ```
 We set the precedence of `_≡_` at level 4, the same as `_≤_`,
@@ -156,7 +153,7 @@ Again, a useful exercise is to carry out an interactive development,
 checking how Agda's knowledge changes as each of the two arguments is
 instantiated.
 
-## Congruence and substitution {name=cong}
+## Congruence and substitution {#cong}
 
 Equality satisfies _congruence_.  If two terms are equal,
 they remain so after the same function is applied to both:
@@ -918,7 +915,7 @@ Jesper Cockx, Dominique Devries, Andreas Nuyts, and Philip Wadler,
 draft, 2017.)
 
 
-## Universe polymorphism {name=unipoly}
+## Universe polymorphism {#unipoly}
 
 As we have seen, not every type belongs to `Set`, but instead every
 type belongs somewhere in the hierarchy `Set₀`, `Set₁`, `Set₂`, and so on,
