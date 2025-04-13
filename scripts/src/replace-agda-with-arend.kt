@@ -1,5 +1,6 @@
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.stream.Stream
 
 const val agdaMarkdownExt = ".lagda.md"
 const val arendExt = ".ard"
@@ -7,16 +8,18 @@ const val specialCommentStart = "{-Agda-"
 const val specialCommentEnd = "-Agda-}"
 
 fun main() {
-    replace(Path.of("plfa.github.io", "src", "plfa", "part2"), Path.of("book", "src", "part2"))
+    replace(Path.of("plfa.github.io", "src", "plfa", "part1", "Induction.lagda.md"), Path.of("book", "src", "part1", "Induction.ard"))
 }
 
 private fun replace(agdaFilesPath: Path, arendFilesPath: Path) {
     println("INFO: processing $agdaFilesPath and $arendFilesPath")
-    val agdaMarkdownFiles = Files.list(agdaFilesPath)
+    val agdaFilesStream = if (Files.isDirectory(agdaFilesPath)) Files.list(agdaFilesPath) else Stream.of(agdaFilesPath)
+    val agdaMarkdownFiles = agdaFilesStream
         .filter { it.fileName.toString().endsWith(agdaMarkdownExt) }
         .toList()
     println("INFO: found ${agdaMarkdownFiles.size} Agda Markdown files")
-    val arendFiles = Files.list(arendFilesPath)
+    val arendFilesStream = if (Files.isDirectory(arendFilesPath)) Files.list(arendFilesPath) else Stream.of(arendFilesPath)
+    val arendFiles = arendFilesStream
         .filter { it.fileName.toString().endsWith(arendExt) }
         .toList()
     println("INFO: found ${arendFiles.size} Arend files")
@@ -47,7 +50,7 @@ private fun replace(agdaFilesPath: Path, arendFilesPath: Path) {
         val agdaFileText = Files.readString(agda)
         val (updatedFileText, _) =
             parsedPairs.fold(agdaFileText to 0) { (fileText, offset), (key, arendCode) ->
-                val agdaCode = "```\n$key\n```"
+                val agdaCode = "```agda\n$key\n```"
                 val replacement = """<details><summary>Agda</summary>
 
 ```agda
@@ -68,7 +71,7 @@ $arendCode
                     return@fold fileText to offset
                 }
                 val endOffset = startOffset + agdaCode.length
-                fileText.replaceRange(startOffset, endOffset, replacement) to endOffset
+                fileText.replaceRange(startOffset, endOffset, replacement) to startOffset + replacement.length
             }
         Files.writeString(agda, updatedFileText)
         println("INFO: replaced $agda")
