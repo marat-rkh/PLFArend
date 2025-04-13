@@ -1,12 +1,9 @@
 ---
 title     : "Induction: Proof by Induction"
-layout    : page
-prev      : /Naturals/
 permalink : /Induction/
-next      : /Relations/
 ---
 
-```
+```agda
 module plfa.part1.Induction where
 ```
 
@@ -23,7 +20,7 @@ _induction_.
 ## Imports
 
 We require equality as in the previous chapter, plus the naturals
-and some operations upon them.  We also import a couple of new operations,
+and some operations upon them.  We also require a couple of new operations,
 `cong`, `sym`, and `_≡⟨_⟩_`, which are explained below:
 <details><summary>Agda</summary>
 
@@ -42,6 +39,7 @@ open import Data.Nat using (ℕ; zero; suc; _+_; _*_; _∸_)
 \open Nat (+, *)
 \import Arith.Nat (-')
 ```
+(Importing `step-≡` defines `_≡⟨_⟩_`.)
 
 
 ## Properties of operators
@@ -61,10 +59,10 @@ on names for some of the most common properties.
 * _Commutativity_.   Operator `+` is commutative if order of
   arguments does not matter: `m + n ≡ n + m`, for all `m` and `n`.
 
-* _Distributivity_.   Operator `*` distributes over operator `+` from the
-  left if `(m + n) * p ≡ (m * p) + (n * p)`, for all `m`, `n`, and `p`,
-  and from the right if `m * (p + q) ≡ (m * p) + (m * q)`, for all `m`,
-  `p`, and `q`.
+* _Distributivity_.  Operator `*` distributes over operator `+` from
+  the left if `m * (p + q) ≡ (m * p) + (m * q)`, for all `m`, `p`, and
+  `q`, and from the right if `(m + n) * p ≡ (m * p) + (n * p)`, for all
+  `m`, `n`, and `p`.
 
 Addition has identity `0` and multiplication has identity `1`;
 addition and multiplication are both associative and commutative;
@@ -82,7 +80,7 @@ distributes over another operator.  A careful author will often call
 out these properties---or their lack---for instance by pointing out
 that a newly introduced operator is associative but not commutative.
 
-#### Exercise `operators` (practice) {name=operators}
+#### Exercise `operators` (practice) {#operators}
 
 Give another example of a pair of operators that have an identity
 and are associative, commutative, and distribute over one another.
@@ -730,7 +728,7 @@ the main proposition first, and the equations required to do so
 will suggest what lemmas to prove.
 
 
-## Our first corollary: rearranging {name=sections}
+## Our first corollary: rearranging {#sections}
 
 We can apply associativity to rearrange parentheses however we like.
 Here is an example:
@@ -741,11 +739,9 @@ Here is an example:
 +-rearrange m n p q =
   begin
     (m + n) + (p + q)
-  ≡⟨ +-assoc m n (p + q) ⟩
-    m + (n + (p + q))
-  ≡⟨ cong (m +_) (sym (+-assoc n p q)) ⟩
-    m + ((n + p) + q)
-  ≡⟨ sym (+-assoc m (n + p) q) ⟩
+  ≡⟨ sym (+-assoc (m + n) p q) ⟩
+    ((m + n) + p) + q
+  ≡⟨ cong (_+ q) (+-assoc m n p) ⟩
     (m + (n + p)) + q
   ∎
 ```
@@ -753,9 +749,8 @@ Here is an example:
 
 ```tex
 \func +-rearrange (m n p q : Nat) : (m + n) + (p + q) = m + (n + p) + q =>
-  (m + n) + (p + q) ==< +-assoc m n (p + q) >==
-  m + (n + (p + q)) ==< pmap (m +) (inv (+-assoc n p q)) >==
-  m + ((n + p) + q) ==< inv (+-assoc m (n + p) q) >==
+  (m + n) + (p + q) ==< inv (+-assoc (m + n) p q) >==
+  ((m + n) + p) + q ==< pmap (__ + q) (+-assoc m n p) >==
   (m + (n + p)) + q `qed
 ```
 No induction is required, we simply apply associativity twice.
@@ -765,26 +760,30 @@ First, addition associates to the left, so `m + (n + p) + q`
 stands for `(m + (n + p)) + q`.
 
 Second, we use `sym` to interchange the sides of an equation.
-Proposition `+-assoc n p q` shifts parentheses from right to left:
+Proposition `+-assoc (m + n) p q` shifts parentheses from left to right:
 
-    (n + p) + q ≡ n + (p + q)
+    ((m + n) + p) + q ≡ (m + n) + (p + q)
 
 To shift them the other way, we use `sym (+-assoc n p q)`:
 
-    n + (p + q) ≡ (n + p) + q
+    (m + n) + (p + q) ≡ ((m + n) + p) + q
 
 In general, if `e` provides evidence for `x ≡ y` then `sym e` provides
 evidence for `y ≡ x`.
 
 Third, Agda supports a variant of the _section_ notation introduced by
-Richard Bird.  We write `(x +_)` for the function that applied to `y`
-returns `x + y`.  Thus, applying the congruence `cong (m +_)` takes
-the above equation into:
+Richard Bird.  We write `(_+ y)` for the function that applied to `x`
+returns `x + y`.  Thus, applying the congruence `cong (_+ q)` to
+`assoc m n p` takes the equation:
 
-    m + (n + (p + q)) ≡ m + ((n + p) + q)
+    (m + n) + p  ≡  m + (n + p)
 
-Similarly, we write `(_+ x)` for the function that applied to `y`
-returns `y + x`; the same works for any infix operator.
+into the equation:
+
+    ((m + n) + p) + q  ≡  (m + (n + p)) + q
+
+Similarly, we write `(x +_)` for the function that applied to `y`
+returns `x + y`; the same works for any infix operator.
 
 
 
@@ -837,7 +836,7 @@ judgments where the first number is less than _m_.
 There is also a completely finite approach to generating the same equations,
 which is left as an exercise for the reader.
 
-#### Exercise `finite-|-assoc` (stretch) {name=finite-plus-assoc}
+#### Exercise `finite-+-assoc` (stretch) {#finite-plus-assoc}
 
 Write out what is known about associativity of addition on each of the
 first four days using a finite story of creation, as
@@ -896,9 +895,15 @@ Simplifying both sides with the inductive case of addition yields the equation:
 
     suc ((m + n) + p) ≡ suc (m + (n + p))
 
-After rewriting with the inductive hypothesis these two terms are equal, and the
-proof is again given by `refl`.  Rewriting by a given equation is indicated by
-the keyword `rewrite` followed by a proof of that equation.  Rewriting avoids
+This is our goal to be proved.  Rewriting by a given equation is
+indicated by the keyword `rewrite` followed by a proof of that
+equation.  Rewriting replaces each occurrence of the left-hand side of
+the equation in the goal by the right-hand side.  In this case, after
+rewriting by the inductive hypothesis our goal becomes
+
+    suc (m + (n + p)) ≡ suc (m + (n + p))
+
+and the proof is again given by `refl`.  Rewriting avoids
 not only chains of equations but also the need to invoke `cong`.
 
 
@@ -1040,7 +1045,7 @@ typing `C-c C-r` will fill it in, completing the proof:
     +-assoc′ (suc m) n p rewrite +-assoc′ m n p = refl
 
 
-#### Exercise `+-swap` (recommended) {name=plus-swap}
+#### Exercise `+-swap` (recommended) {#plus-swap}
 
 Show
 
@@ -1066,7 +1071,7 @@ is associative and commutative.
 ```
 
 
-#### Exercise `*-distrib-+` (recommended) {name=times-distrib-plus}
+#### Exercise `*-distrib-+` (recommended) {#times-distrib-plus}
 
 Show multiplication distributes over addition, that is,
 
@@ -1091,7 +1096,7 @@ for all naturals `m`, `n`, and `p`.
 ```
 
 
-#### Exercise `*-assoc` (recommended) {name=times-assoc}
+#### Exercise `*-assoc` (recommended) {#times-assoc}
 
 Show multiplication is associative, that is,
 
@@ -1116,7 +1121,7 @@ for all naturals `m`, `n`, and `p`.
 ```
 
 
-#### Exercise `*-comm` (practice) {name=times-comm}
+#### Exercise `*-comm` (practice) {#times-comm}
 
 Show multiplication is commutative, that is,
 
@@ -1154,7 +1159,7 @@ you will need to formulate and prove suitable lemmas.
 ```
 
 
-#### Exercise `0∸n≡0` (practice) {name=zero-monus}
+#### Exercise `0∸n≡0` (practice) {#zero-monus}
 
 Show
 
@@ -1174,7 +1179,7 @@ for all naturals `n`. Did your proof require induction?
 ```
 
 
-#### Exercise `∸-|-assoc` (practice) {name=monus-plus-assoc}
+#### Exercise `∸-+-assoc` (practice) {#monus-plus-assoc}
 
 Show that monus associates with addition, that is,
 
@@ -1208,7 +1213,7 @@ for all naturals `m`, `n`, and `p`.
 
 Show the following three laws
 
-     m ^ (n + p) ≡ (m ^ n) * (m ^ p)  (^-distribˡ-|-*)
+     m ^ (n + p) ≡ (m ^ n) * (m ^ p)  (^-distribˡ-+-*)
      (m * n) ^ p ≡ (m ^ p) * (n ^ p)  (^-distribʳ-*)
      (m ^ n) ^ p ≡ m ^ (n * p)        (^-*-assoc)
 
@@ -1255,7 +1260,8 @@ for all `m`, `n`, and `p`.
     m ^ (n * p + n) `qed
 ```
 
-#### Exercise `Bin-laws` (stretch) {name=Bin-laws}
+
+#### Exercise `Bin-laws` (stretch) {#Bin-laws}
 
 Recall that
 Exercise [Bin](/Naturals/#Bin)
@@ -1308,7 +1314,7 @@ For each law: if it holds, prove; if not, give a counterexample.
 ## Standard library
 
 Definitions similar to those in this chapter can be found in the standard library:
-```
+```agda
 import Data.Nat.Properties using (+-assoc; +-identityʳ; +-suc; +-comm)
 ```
 

@@ -248,19 +248,16 @@ _ =
 +-rearrange m n p q =
   begin
     (m + n) + (p + q)
-  ≡⟨ +-assoc m n (p + q) ⟩
-    m + (n + (p + q))
-  ≡⟨ cong (m +_) (sym (+-assoc n p q)) ⟩
-    m + ((n + p) + q)
-  ≡⟨ sym (+-assoc m (n + p) q) ⟩
+  ≡⟨ sym (+-assoc (m + n) p q) ⟩
+    ((m + n) + p) + q
+  ≡⟨ cong (_+ q) (+-assoc m n p) ⟩
     (m + (n + p)) + q
   ∎
 -Agda-}
 
 \func +-rearrange (m n p q : Nat) : (m + n) + (p + q) = m + (n + p) + q =>
-  (m + n) + (p + q) ==< +-assoc m n (p + q) >==
-  m + (n + (p + q)) ==< pmap (m +) (inv (+-assoc n p q)) >==
-  m + ((n + p) + q) ==< inv (+-assoc m (n + p) q) >==
+  (m + n) + (p + q) ==< inv (+-assoc (m + n) p q) >==
+  ((m + n) + p) + q ==< pmap (__ + q) (+-assoc m n p) >==
   (m + (n + p)) + q `qed
 
 {-Agda-
