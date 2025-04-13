@@ -5,6 +5,10 @@ This is the PLFA book with all code snippets rewritten in Arend.
 [The book](book/README.md) is a collection of markdown files, you can read it right here on GitHub.
 If you want to interact with the code snippets, clone the repo and open in IntelliJ IDEA with [Arend plugin installed](https://arend-lang.github.io/documentation/getting-started).
 
+PLFA version: 22.08.
+
+Arend version: 1.10.
+
 ## Progress
 
 Part 1: 10/10 sections completed.
